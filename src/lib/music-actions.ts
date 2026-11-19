@@ -4,17 +4,15 @@ import { revalidatePath } from "next/cache";
 import { unlink } from "fs/promises";
 import { getCurrentUser } from "@/lib/auth";
 import {
-  addSongAsset,
   createSong,
   deleteSong,
   deleteSongAsset,
   getSong,
   updateSongDetails,
   updateSongStatus,
-  type SongAssetKind,
 } from "@/lib/music";
 import { canSetRepertoire, canUpload } from "@/lib/roles";
-import { absoluteUploadPath, saveUpload } from "@/lib/storage";
+import { absoluteUploadPath } from "@/lib/storage";
 
 export type MusicActionResult =
   | { ok: true; message?: string }
@@ -120,66 +118,6 @@ export async function deleteSongAction(songId: string): Promise<MusicActionResul
     return {
       ok: false,
       error: error instanceof Error ? error.message : "Could not delete song.",
-    };
-  }
-}
-
-export async function uploadSongAssetAction(
-  songId: string,
-  _prev: MusicActionResult | null,
-  formData: FormData,
-): Promise<MusicActionResult> {
-  try {
-    await requireUploader();
-    const kindRaw = String(formData.get("kind") ?? "");
-    const kind: SongAssetKind =
-      kindRaw === "rehearsal_audio" ? "rehearsal_audio" : "sheet_pdf";
-    const label = String(formData.get("label") ?? "");
-    const file = formData.get("file");
-
-    if (!(file instanceof File) || file.size === 0) {
-      throw new Error("Choose a file to upload.");
-    }
-
-    if (kind === "sheet_pdf") {
-      const okType =
-        file.type === "application/pdf" ||
-        file.name.toLowerCase().endsWith(".pdf");
-      if (!okType) throw new Error("Sheet music must be a PDF.");
-    }
-
-    if (kind === "rehearsal_audio") {
-      const lower = file.name.toLowerCase();
-      const okType =
-        file.type.startsWith("audio/") ||
-        [".mp3", ".wav", ".m4a", ".aac", ".ogg"].some((ext) =>
-          lower.endsWith(ext),
-        );
-      if (!okType) throw new Error("Rehearsal audio must be an audio file.");
-    }
-
-    const buffer = Buffer.from(await file.arrayBuffer());
-    const saved = await saveUpload({
-      category: "songs",
-      originalName: file.name,
-      data: buffer,
-      mimeType: file.type || undefined,
-    });
-
-    await addSongAsset({
-      songId,
-      kind,
-      label: label || file.name,
-      storagePath: saved.storagePath,
-      mimeType: file.type || undefined,
-    });
-
-    revalidatePath("/app/music");
-    return { ok: true, message: "File uploaded." };
-  } catch (error) {
-    return {
-      ok: false,
-      error: error instanceof Error ? error.message : "Upload failed.",
     };
   }
 }

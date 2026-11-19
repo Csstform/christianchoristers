@@ -3,6 +3,7 @@ import { stat } from "fs/promises";
 import { NextResponse } from "next/server";
 import { Readable } from "stream";
 import { getCurrentUser } from "@/lib/auth";
+import { contentTypeForAsset } from "@/lib/file-validation";
 import { getSongAsset } from "@/lib/music";
 import { absoluteUploadPath } from "@/lib/storage";
 
@@ -36,13 +37,27 @@ export async function GET(
     asset.storagePath.split("/").pop() ||
     "download";
 
+  const contentType = contentTypeForAsset({
+    kind: asset.kind,
+    storagePath: asset.storagePath,
+    mimeType: asset.mimeType,
+  });
+
+  // PDFs can render inline safely with a forced type + nosniff.
+  // Never trust uploader-controlled mime types for execution.
+  const disposition =
+    asset.kind === "sheet_pdf"
+      ? `inline; filename="${filename}"`
+      : `inline; filename="${filename}"`;
+
   const nodeStream = createReadStream(absolute);
   const webStream = Readable.toWeb(nodeStream) as ReadableStream;
 
   return new NextResponse(webStream, {
     headers: {
-      "Content-Type": asset.mimeType || "application/octet-stream",
-      "Content-Disposition": `inline; filename="${filename}"`,
+      "Content-Type": contentType,
+      "Content-Disposition": disposition,
+      "X-Content-Type-Options": "nosniff",
       "Cache-Control": "private, max-age=3600",
     },
   });
