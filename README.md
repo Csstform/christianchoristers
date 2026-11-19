@@ -48,5 +48,6 @@ Member → Manager → Director → Admin (see product handoff for capability ma
 ## Notes
 
 - No public signup; admins invite users.
-- Member feature UIs are scaffolded; music vault, RSVPs, announcements, files, and suggestions are next MVP slices.
+- Member music library supports active/archive repertoire, search, PDF + rehearsal audio uploads (managers+), and repertoire status changes (directors+).
+- Remaining MVP slices: announcements, concert RSVPs, file vault, song suggestions.
 - Compose is the shared runtime shape for Cloud Agents and the droplet.
