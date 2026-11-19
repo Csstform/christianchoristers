@@ -532,6 +532,36 @@ a {
   margin-left: 0.5rem;
 }
 
+.vault-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.vault-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+  border: 1px solid var(--line);
+  border-radius: 0.9rem;
+  padding: 0.95rem 1.05rem;
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.vault-row h3 {
+  margin: 0;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.2rem;
+}
+
+.vault-row__actions {
+  display: flex;
+  gap: 0.45rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
 @keyframes rise {
   from {
     opacity: 0;
