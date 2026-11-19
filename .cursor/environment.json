@@ -1,0 +1,4 @@
+{
+  "install": "npm ci && (command -v docker >/dev/null || true)",
+  "start": "bash .cursor/start.sh"
+}
