@@ -562,6 +562,54 @@ a {
   flex-wrap: wrap;
 }
 
+.calendar-section {
+  margin-top: 1.5rem;
+}
+
+.calendar-section h3 {
+  margin: 0 0 0.75rem;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.25rem;
+}
+
+.rsvp-table-wrap {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.rsvp-table-scroll {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 0.85rem;
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.rsvp-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+
+.rsvp-table th,
+.rsvp-table td {
+  text-align: left;
+  padding: 0.7rem 0.8rem;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+
+.rsvp-table th {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ink-soft);
+  background: rgba(243, 246, 250, 0.9);
+}
+
+.rsvp-table tr:last-child td {
+  border-bottom: none;
+}
+
 @keyframes rise {
   from {
     opacity: 0;
