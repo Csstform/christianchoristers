@@ -610,6 +610,53 @@ a {
   border-bottom: none;
 }
 
+.checkbox-row {
+  display: flex !important;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: 0.95rem;
+}
+
+.checkbox-row input {
+  width: auto;
+}
+
+.announcement-body {
+  margin: 0.75rem 0 0;
+  white-space: pre-wrap;
+  line-height: 1.55;
+  color: var(--ink);
+}
+
+.home-card-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-items: baseline;
+  margin-bottom: 0.85rem;
+}
+
+.home-card-head h2 {
+  margin: 0;
+}
+
+.home-card-head a {
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+}
+
+.home-concert h3 {
+  margin: 0;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.15rem;
+}
+
+.home-concert + .home-concert {
+  margin-top: 0.85rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--line);
+}
+
 @keyframes rise {
   from {
     opacity: 0;

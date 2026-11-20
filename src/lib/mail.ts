@@ -80,6 +80,66 @@ export function appBaseUrl(): string {
   );
 }
 
+export function isSmtpConfigured(): boolean {
+  return Boolean(process.env.SMTP_HOST);
+}
+
+export async function sendAnnouncementEmails(input: {
+  title: string;
+  body: string;
+  authorName: string;
+  recipients: Array<{ email: string; name: string }>;
+}): Promise<{ sent: number; failed: number; skipped: boolean; errors: string[] }> {
+  if (!input.recipients.length) {
+    return { sent: 0, failed: 0, skipped: false, errors: [] };
+  }
+
+  // Local/dev without SMTP: log and treat as skipped (announcement still saved)
+  if (!isSmtpConfigured() && process.env.NODE_ENV !== "production") {
+    console.info("[mail:dev] announcement email", {
+      title: input.title,
+      recipients: input.recipients.map((r) => r.email),
+    });
+    return {
+      sent: 0,
+      failed: 0,
+      skipped: true,
+      errors: ["SMTP_HOST not set; email skipped in development."],
+    };
+  }
+
+  const subject = `Announcement: ${input.title}`;
+  const link = `${appBaseUrl()}/app/announcements`;
+  let sent = 0;
+  let failed = 0;
+  const errors: string[] = [];
+
+  for (const recipient of input.recipients) {
+    const text = `Hello ${recipient.name},
+
+${input.authorName} posted a new Christian Choristers announcement:
+
+${input.title}
+
+${input.body}
+
+View in the member app:
+${link}
+`;
+    try {
+      await sendMail({ to: recipient.email, subject, text });
+      sent += 1;
+    } catch (error) {
+      failed += 1;
+      const message = error instanceof Error ? error.message : "send failed";
+      errors.push(`${recipient.email}: ${message}`);
+      console.error("[mail] announcement send failed", recipient.email, error);
+    }
+  }
+
+  return { sent, failed, skipped: false, errors };
+}
+
 export function assertSmtpConfiguredForProduction() {
   if (process.env.NODE_ENV === "production") {
     required("SMTP_HOST");

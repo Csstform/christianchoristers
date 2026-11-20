@@ -5,6 +5,7 @@ import { canManageUsers } from "@/lib/roles";
 
 const links = [
   { href: "/app", label: "Home" },
+  { href: "/app/announcements", label: "Announcements" },
   { href: "/app/music", label: "Music" },
   { href: "/app/calendar", label: "Calendar" },
   { href: "/app/files", label: "Files" },
