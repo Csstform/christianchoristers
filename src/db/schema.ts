@@ -205,9 +205,13 @@ export const songSuggestions = pgTable("song_suggestions", {
 
 export const albums = pgTable("albums", {
   id: uuid("id").defaultRandom().primaryKey(),
+  slug: varchar("slug", { length: 128 }).notNull().unique(),
   title: varchar("title", { length: 255 }).notNull(),
   sortOrder: integer("sort_order").notNull().default(0),
   spotifyUrl: text("spotify_url"),
+  cdUrl: text("cd_url"),
+  /** Relative path under UPLOADS_DIR for optional on-server album audio. */
+  localAudioPath: text("local_audio_path"),
   coverPath: text("cover_path"),
   published: boolean("published").notNull().default(true),
   createdAt: timestamp("created_at", { withTimezone: true })
