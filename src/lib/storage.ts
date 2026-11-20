@@ -13,7 +13,7 @@ export async function ensureUploadsRoot(): Promise<string> {
 }
 
 export async function saveUpload(input: {
-  category: "vault" | "songs" | "covers";
+  category: "vault" | "songs" | "covers" | "suggestions";
   originalName: string;
   data: Buffer;
   mimeType?: string;

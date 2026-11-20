@@ -657,6 +657,52 @@ a {
   border-top: 1px solid var(--line);
 }
 
+.song-pill--submitted {
+  background: #eef1f5;
+  color: #3a4a63;
+}
+
+.song-pill--reviewing {
+  background: #fff4df;
+  color: #7a5310;
+}
+
+.song-pill--accepted {
+  background: #e7f5eb;
+  color: #1e4d2b;
+}
+
+.song-pill--declined {
+  background: #f8e8e8;
+  color: #8b1e1e;
+}
+
+.suggestion-link {
+  margin: 0.75rem 0 0;
+}
+
+.suggestion-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  align-items: end;
+  margin-top: 0.9rem;
+}
+
+.suggestion-status {
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.9rem;
+}
+
+.suggestion-status select {
+  border: 1px solid var(--line);
+  background: #fff;
+  border-radius: 0.55rem;
+  padding: 0.55rem 0.7rem;
+  font: inherit;
+}
+
 @keyframes rise {
   from {
     opacity: 0;
