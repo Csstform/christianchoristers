@@ -9,23 +9,31 @@ export const albums = [
   { title: "When He Shall Come", spotifyUrl: null },
 ];
 
-export const liveRecordings = [
+export type LiveRecording = {
+  title: string;
+  location: string;
+  year: number;
+  youtubeUrl: string | null;
+};
+
+export const liveRecordings: LiveRecording[] = [
   {
     title: "Sunday – Christian Choristers",
     location: "North Phoenix, AZ",
     year: 2019,
-    youtubeUrl: null as string | null,
+    youtubeUrl:
+      "https://www.youtube.com/playlist?list=PLhv8RTZ0BOYOXMp7rs7tcZczCMycBibR0",
   },
   {
     title: "Let Some Drops Fall On Me",
     location: "Union City, PA",
     year: 2011,
-    youtubeUrl: null,
+    youtubeUrl: "https://www.youtube.com/watch?v=dZvYsC7_fFo",
   },
   {
     title: "When He Shall Come – 50th Year Reunion",
     location: "Norton, OH",
     year: 2009,
-    youtubeUrl: null,
+    youtubeUrl: "https://www.youtube.com/watch?v=FZuddy0sRO4",
   },
 ];
