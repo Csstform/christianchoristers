@@ -151,7 +151,7 @@ export async function resendInvite(input: {
   userId: string;
   actorId: string;
   sendEmail?: boolean;
-}): Promise<{ inviteUrl: string; email: string }> {
+}): Promise<{ inviteUrl: string; email: string; emailSent: boolean }> {
   if (input.userId === input.actorId) {
     throw new Error("You cannot resend an invite to yourself.");
   }
@@ -186,6 +186,7 @@ export async function resendInvite(input: {
   });
 
   const inviteUrl = `${appBaseUrl()}/invite/${rawToken}`;
+  let emailSent = false;
   if (input.sendEmail !== false) {
     try {
       await sendInviteEmail({
@@ -193,10 +194,11 @@ export async function resendInvite(input: {
         name: target.name,
         inviteUrl,
       });
+      emailSent = true;
     } catch (error) {
       console.error("[invite] resend email failed; invite still created", error);
     }
   }
 
-  return { inviteUrl, email: target.email };
+  return { inviteUrl, email: target.email, emailSent };
 }

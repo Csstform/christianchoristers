@@ -27,7 +27,12 @@ export async function createInvite(input: {
   email: string;
   name: string;
   role?: UserRole;
-}): Promise<{ user: User; inviteUrl: string; rawToken: string }> {
+}): Promise<{
+  user: User;
+  inviteUrl: string;
+  rawToken: string;
+  emailSent: boolean;
+}> {
   return createInviteRecord(input);
 }
 

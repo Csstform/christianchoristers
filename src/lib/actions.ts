@@ -10,6 +10,7 @@ import {
   loginWithPassword,
 } from "@/lib/auth";
 import { canManageUsers } from "@/lib/roles";
+import { safeAppPath } from "@/lib/paths";
 import type { UserRole } from "@/db/schema";
 
 export type ActionResult = { ok: true; message?: string } | { ok: false; error: string };
@@ -20,6 +21,7 @@ export async function loginAction(
 ): Promise<ActionResult> {
   const email = String(formData.get("email") ?? "");
   const password = String(formData.get("password") ?? "");
+  const next = safeAppPath(String(formData.get("next") ?? ""));
   try {
     await loginWithPassword({ email, password });
   } catch (error) {
@@ -28,7 +30,7 @@ export async function loginAction(
       error: error instanceof Error ? error.message : "Login failed.",
     };
   }
-  redirect("/app");
+  redirect(next);
 }
 
 export async function logoutAction(): Promise<void> {
@@ -71,11 +73,17 @@ export async function inviteUserAction(
   const role = String(formData.get("role") ?? "member") as UserRole;
 
   try {
-    const { inviteUrl } = await createInvite({ email, name, role });
+    const { inviteUrl, emailSent } = await createInvite({ email, name, role });
     revalidatePath("/app/admin");
+    if (emailSent) {
+      return {
+        ok: true,
+        message: `Invite emailed to ${email}.`,
+      };
+    }
     return {
       ok: true,
-      message: `Invite created for ${email}. Set-password link: ${inviteUrl}`,
+      message: `Invite created for ${email}, but email was not sent. Set-password link: ${inviteUrl}`,
     };
   } catch (error) {
     return {

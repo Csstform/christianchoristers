@@ -29,11 +29,23 @@ The seed script prints an admin invite URL (set `SEED_ADMIN_EMAIL` in `.env`).
 
 ```bash
 cp .env.example .env   # fill SMTP_*, AUTH_SECRET, strong DB password, APP_BASE_URL
+# Set NODE_ENV=production so session cookies get the Secure flag
 docker compose up -d --build
 docker compose exec app npx drizzle-kit migrate   # or db:push on first bring-up
 ```
 
 Point Cloudflare DNS at the droplet when ready to cut over from MediaServe/WordPress.
+
+### Backups
+
+```bash
+sudo mkdir -p /opt/backups/christianchoristers
+sudo cp deploy/backup.sh /opt/christianchoristers/deploy/backup.sh
+sudo chmod +x /opt/christianchoristers/deploy/backup.sh
+# Daily 06:15 UTC
+echo '15 6 * * * root APP_DIR=/opt/christianchoristers /opt/christianchoristers/deploy/backup.sh >> /var/log/choristers-backup.log 2>&1' \
+  | sudo tee /etc/cron.d/christianchoristers-backup
+```
 
 ## Routes
 
