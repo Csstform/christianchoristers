@@ -9,6 +9,9 @@ export const metadata: Metadata = {
   title: "Music",
 };
 
+/** Re-check on-disk album audio each request (uploads are not part of the build). */
+export const dynamic = "force-dynamic";
+
 export default async function MusicPage() {
   const availability = await Promise.all(
     albums.map(async (album) => ({
