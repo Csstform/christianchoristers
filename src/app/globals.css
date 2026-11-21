@@ -454,14 +454,19 @@ a {
 
 .waveform-player {
   display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 0.75rem;
-  align-items: center;
+  gap: 0.35rem;
   width: 100%;
 }
 
 .waveform-player audio {
   display: none;
+}
+
+.waveform-player__row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 0.75rem;
+  align-items: center;
 }
 
 .waveform-player__play {
@@ -471,21 +476,17 @@ a {
   color: var(--white);
   border-radius: 999px;
   min-width: 4.25rem;
-  padding: 0.45rem 0.85rem;
+  height: 2.5rem;
+  padding: 0 0.85rem;
   font: inherit;
   font-size: 0.85rem;
   letter-spacing: 0.02em;
   cursor: pointer;
+  align-self: center;
 }
 
 .waveform-player__play:hover {
   background: var(--ink);
-}
-
-.waveform-player__body {
-  min-width: 0;
-  display: grid;
-  gap: 0.35rem;
 }
 
 .waveform-player__track {
@@ -497,6 +498,7 @@ a {
   overflow: hidden;
   cursor: pointer;
   touch-action: none;
+  min-width: 0;
 }
 
 .waveform-player__track:focus-visible {
@@ -520,12 +522,77 @@ a {
   pointer-events: none;
 }
 
+.waveform-player__volume {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 7.5rem;
+}
+
+.waveform-player__mute {
+  appearance: none;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--paper) 70%, white);
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 0.35rem 0.65rem;
+  font: inherit;
+  font-size: 0.78rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.waveform-player__mute:hover {
+  background: color-mix(in srgb, var(--ink) 8%, white);
+}
+
+.waveform-player__volume-range {
+  width: 5.5rem;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
 .waveform-player__times {
   display: flex;
   justify-content: space-between;
   font-size: 0.78rem;
   color: var(--ink-soft);
   font-variant-numeric: tabular-nums;
+  padding-left: calc(4.25rem + 0.75rem);
+  padding-right: calc(7.5rem + 0.75rem);
+}
+
+@media (max-width: 640px) {
+  .waveform-player__row {
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas:
+      "play track"
+      "volume volume";
+  }
+
+  .waveform-player__play {
+    grid-area: play;
+  }
+
+  .waveform-player__track {
+    grid-area: track;
+  }
+
+  .waveform-player__volume {
+    grid-area: volume;
+    min-width: 0;
+    justify-content: flex-end;
+  }
+
+  .waveform-player__volume-range {
+    width: min(9rem, 100%);
+    flex: 1;
+  }
+
+  .waveform-player__times {
+    padding-left: 0;
+    padding-right: 0;
+  }
 }
 
 .recording-embed {

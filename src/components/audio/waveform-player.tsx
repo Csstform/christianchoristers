@@ -71,11 +71,14 @@ export function WaveformPlayer({
   const peaksRef = useRef<number[]>([]);
   const progressRef = useRef(0);
   const draggingRef = useRef(false);
+  const lastVolumeRef = useRef(1);
 
   const [peaks, setPeaks] = useState<number[]>([]);
   const [playing, setPlaying] = useState(false);
   const [duration, setDuration] = useState(0);
   const [current, setCurrent] = useState(0);
+  const [volume, setVolume] = useState(1);
+  const [muted, setMuted] = useState(false);
   const [loadingWave, setLoadingWave] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -152,6 +155,10 @@ export function WaveformPlayer({
     const onMeta = () => setDuration(audio.duration || 0);
     const onPlay = () => setPlaying(true);
     const onPause = () => setPlaying(false);
+    const onVolume = () => {
+      setVolume(audio.volume);
+      setMuted(audio.muted || audio.volume === 0);
+    };
     const onEnded = () => {
       setPlaying(false);
       progressRef.current = 1;
@@ -162,15 +169,24 @@ export function WaveformPlayer({
     audio.addEventListener("loadedmetadata", onMeta);
     audio.addEventListener("play", onPlay);
     audio.addEventListener("pause", onPause);
+    audio.addEventListener("volumechange", onVolume);
     audio.addEventListener("ended", onEnded);
     return () => {
       audio.removeEventListener("timeupdate", onTime);
       audio.removeEventListener("loadedmetadata", onMeta);
       audio.removeEventListener("play", onPlay);
       audio.removeEventListener("pause", onPause);
+      audio.removeEventListener("volumechange", onVolume);
       audio.removeEventListener("ended", onEnded);
     };
   }, [src]);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    audio.volume = volume;
+    audio.muted = muted;
+  }, [volume, muted]);
 
   function seekFromClientX(clientX: number) {
     const track = trackRef.current;
@@ -200,18 +216,40 @@ export function WaveformPlayer({
     }
   }
 
+  function toggleMute() {
+    const audio = audioRef.current;
+    if (!audio) return;
+    if (muted || volume === 0) {
+      const restored = lastVolumeRef.current > 0 ? lastVolumeRef.current : 1;
+      setVolume(restored);
+      setMuted(false);
+    } else {
+      lastVolumeRef.current = volume > 0 ? volume : 1;
+      setMuted(true);
+    }
+  }
+
+  function onVolumeInput(next: number) {
+    const clamped = Math.min(1, Math.max(0, next));
+    if (clamped > 0) lastVolumeRef.current = clamped;
+    setVolume(clamped);
+    setMuted(clamped === 0);
+  }
+
+  const volumePercent = Math.round((muted ? 0 : volume) * 100);
+
   return (
     <div className="waveform-player" aria-label={label || "Audio player"}>
       <audio ref={audioRef} src={src} preload="metadata" />
-      <button
-        type="button"
-        className="waveform-player__play"
-        onClick={togglePlay}
-        aria-label={playing ? "Pause" : "Play"}
-      >
-        {playing ? "Pause" : "Play"}
-      </button>
-      <div className="waveform-player__body">
+      <div className="waveform-player__row">
+        <button
+          type="button"
+          className="waveform-player__play"
+          onClick={togglePlay}
+          aria-label={playing ? "Pause" : "Play"}
+        >
+          {playing ? "Pause" : "Play"}
+        </button>
         <div
           ref={trackRef}
           className="waveform-player__track"
@@ -258,12 +296,34 @@ export function WaveformPlayer({
             <span className="waveform-player__status">Drawing waveform…</span>
           ) : null}
         </div>
-        <div className="waveform-player__times">
-          <span>{formatTime(current)}</span>
-          <span>{formatTime(duration)}</span>
+        <div className="waveform-player__volume">
+          <button
+            type="button"
+            className="waveform-player__mute"
+            onClick={toggleMute}
+            aria-label={muted || volume === 0 ? "Unmute" : "Mute"}
+            title={muted || volume === 0 ? "Unmute" : "Mute"}
+          >
+            {muted || volume === 0 ? "Muted" : "Vol"}
+          </button>
+          <input
+            className="waveform-player__volume-range"
+            type="range"
+            min={0}
+            max={1}
+            step={0.01}
+            value={muted ? 0 : volume}
+            aria-label="Volume"
+            aria-valuetext={`${volumePercent}%`}
+            onChange={(event) => onVolumeInput(Number(event.target.value))}
+          />
         </div>
-        {error ? <p className="form-error">{error}</p> : null}
       </div>
+      <div className="waveform-player__times">
+        <span>{formatTime(current)}</span>
+        <span>{formatTime(duration)}</span>
+      </div>
+      {error ? <p className="form-error">{error}</p> : null}
     </div>
   );
 }
