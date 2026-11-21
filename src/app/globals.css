@@ -60,6 +60,13 @@ a {
   inset: 0 0 auto;
   z-index: 10;
   padding: 1.25rem 1.5rem;
+  /* Soft top scrim so logo + nav stay readable over light stone in the hero. */
+  background: linear-gradient(
+    180deg,
+    rgba(12, 20, 34, 0.55) 0%,
+    rgba(12, 20, 34, 0.18) 55%,
+    transparent 100%
+  );
 }
 
 .site-header--solid {
@@ -99,12 +106,26 @@ a {
 
 .site-nav {
   display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
   gap: 1.25rem;
   font-size: 0.95rem;
-  color: var(--ink-soft);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: rgba(255, 255, 255, 0.94);
+  text-shadow: 0 1px 10px rgba(12, 20, 34, 0.55);
 }
 
 .site-nav a:hover {
+  color: #ffffff;
+}
+
+.site-header--solid .site-nav {
+  color: var(--ink-soft);
+  text-shadow: none;
+}
+
+.site-header--solid .site-nav a:hover {
   color: var(--ink);
 }
 
