@@ -460,6 +460,10 @@ a {
   width: 100%;
 }
 
+.waveform-player audio {
+  display: none;
+}
+
 .waveform-player__play {
   appearance: none;
   border: 1px solid var(--line);

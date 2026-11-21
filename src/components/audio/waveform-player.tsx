@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useEffectEvent, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { peaksFromAudioBuffer } from "@/lib/audio-peaks";
 
 const DEFAULT_BARS = 96;
@@ -11,6 +11,51 @@ function formatTime(seconds: number): string {
   const m = Math.floor(total / 60);
   const s = total % 60;
   return `${m}:${s.toString().padStart(2, "0")}`;
+}
+
+function paintWaveform(
+  canvas: HTMLCanvasElement,
+  peaks: number[],
+  progress: number,
+) {
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+
+  const dpr = window.devicePixelRatio || 1;
+  const cssWidth = canvas.clientWidth || 320;
+  const cssHeight = canvas.clientHeight || 56;
+  canvas.width = Math.floor(cssWidth * dpr);
+  canvas.height = Math.floor(cssHeight * dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, cssWidth, cssHeight);
+
+  const data =
+    peaks.length > 0
+      ? peaks
+      : Array.from({ length: DEFAULT_BARS }, () => 0.12);
+  const gap = 1.5;
+  const barWidth = Math.max(
+    1.5,
+    (cssWidth - gap * (data.length - 1)) / data.length,
+  );
+  const midY = cssHeight / 2;
+  const progressX = cssWidth * progress;
+
+  const styles = getComputedStyle(document.documentElement);
+  const played = styles.getPropertyValue("--accent").trim() || "#9a6b2f";
+  const rest = styles.getPropertyValue("--ink-soft").trim() || "#3a4a63";
+
+  for (let i = 0; i < data.length; i += 1) {
+    const x = i * (barWidth + gap);
+    const amplitude = Math.max(0.08, data[i] ?? 0);
+    const barHeight = amplitude * (cssHeight * 0.86);
+    const y = midY - barHeight / 2;
+    const center = x + barWidth / 2;
+    ctx.fillStyle = center <= progressX ? played : rest;
+    ctx.globalAlpha = center <= progressX ? 0.95 : 0.35;
+    ctx.fillRect(x, y, barWidth, barHeight);
+  }
+  ctx.globalAlpha = 1;
 }
 
 export function WaveformPlayer({
@@ -34,53 +79,15 @@ export function WaveformPlayer({
   const [loadingWave, setLoadingWave] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const drawWaveform = useEffectEvent(() => {
+  function redraw() {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    const dpr = window.devicePixelRatio || 1;
-    const cssWidth = canvas.clientWidth || 320;
-    const cssHeight = canvas.clientHeight || 56;
-    canvas.width = Math.floor(cssWidth * dpr);
-    canvas.height = Math.floor(cssHeight * dpr);
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.clearRect(0, 0, cssWidth, cssHeight);
-
-    const data =
-      peaksRef.current.length > 0
-        ? peaksRef.current
-        : Array.from({ length: DEFAULT_BARS }, () => 0.12);
-    const gap = 1.5;
-    const barWidth = Math.max(
-      1.5,
-      (cssWidth - gap * (data.length - 1)) / data.length,
-    );
-    const midY = cssHeight / 2;
-    const progressX = cssWidth * progressRef.current;
-
-    const styles = getComputedStyle(document.documentElement);
-    const played = styles.getPropertyValue("--accent").trim() || "#9a6b2f";
-    const rest =
-      styles.getPropertyValue("--ink-soft").trim() || "#3a4a63";
-
-    for (let i = 0; i < data.length; i += 1) {
-      const x = i * (barWidth + gap);
-      const amplitude = Math.max(0.08, data[i] ?? 0);
-      const barHeight = amplitude * (cssHeight * 0.86);
-      const y = midY - barHeight / 2;
-      const center = x + barWidth / 2;
-      ctx.fillStyle = center <= progressX ? played : rest;
-      ctx.globalAlpha = center <= progressX ? 0.95 : 0.35;
-      ctx.fillRect(x, y, barWidth, barHeight);
-    }
-    ctx.globalAlpha = 1;
-  });
+    paintWaveform(canvas, peaksRef.current, progressRef.current);
+  }
 
   useEffect(() => {
     peaksRef.current = peaks;
-    drawWaveform();
+    redraw();
   }, [peaks]);
 
   useEffect(() => {
@@ -117,13 +124,14 @@ export function WaveformPlayer({
   }, [src]);
 
   useEffect(() => {
-    const onResize = () => drawWaveform();
+    const onResize = () => redraw();
     window.addEventListener("resize", onResize);
+    const node = trackRef.current;
     const observer =
-      typeof ResizeObserver !== "undefined" && trackRef.current
+      typeof ResizeObserver !== "undefined" && node
         ? new ResizeObserver(onResize)
         : null;
-    if (trackRef.current && observer) observer.observe(trackRef.current);
+    if (node && observer) observer.observe(node);
     return () => {
       window.removeEventListener("resize", onResize);
       observer?.disconnect();
@@ -139,7 +147,7 @@ export function WaveformPlayer({
         audio.duration > 0 ? Math.min(1, audio.currentTime / audio.duration) : 0;
       progressRef.current = next;
       setCurrent(audio.currentTime);
-      if (!draggingRef.current) drawWaveform();
+      if (!draggingRef.current) redraw();
     };
     const onMeta = () => setDuration(audio.duration || 0);
     const onPlay = () => setPlaying(true);
@@ -147,7 +155,7 @@ export function WaveformPlayer({
     const onEnded = () => {
       setPlaying(false);
       progressRef.current = 1;
-      drawWaveform();
+      redraw();
     };
 
     audio.addEventListener("timeupdate", onTime);
@@ -175,7 +183,7 @@ export function WaveformPlayer({
     audio.currentTime = ratio * audio.duration;
     progressRef.current = ratio;
     setCurrent(audio.currentTime);
-    drawWaveform();
+    redraw();
   }
 
   async function togglePlay() {
