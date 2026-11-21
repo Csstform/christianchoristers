@@ -29,6 +29,9 @@ export default function HomePage() {
             <Link className="btn btn-primary" href="/music">
               Listen to our music
             </Link>
+            <a className="btn btn-ghost" href="#program-schedule">
+              Upcoming programs
+            </a>
             <Link className="btn btn-ghost" href="/login">
               Member login
             </Link>

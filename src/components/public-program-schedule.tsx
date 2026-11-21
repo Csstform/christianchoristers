@@ -8,7 +8,11 @@ export async function PublicProgramSchedule({ limit = 5 }: { limit?: number }) {
   const upcoming = (await listUpcomingConcerts()).slice(0, limit);
 
   return (
-    <section className="section home-schedule" aria-labelledby="program-schedule-heading">
+    <section
+      id="program-schedule"
+      className="section home-schedule"
+      aria-labelledby="program-schedule-heading"
+    >
       <h2 id="program-schedule-heading">Program schedule</h2>
 
       {upcoming.length === 0 ? (
