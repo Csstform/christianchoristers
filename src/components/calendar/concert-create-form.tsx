@@ -36,6 +36,9 @@ export function ConcertCreateForm() {
         Details
         <textarea name="details" rows={3} placeholder="Schedule notes, hosts, etc." />
       </label>
+      <p className="muted">
+        Upcoming programs also appear on the public home page schedule.
+      </p>
       {state && !state.ok ? <p className="form-error">{state.error}</p> : null}
       <button className="btn btn-dark" type="submit" disabled={pending}>
         {pending ? "Creating…" : "Create concert"}
