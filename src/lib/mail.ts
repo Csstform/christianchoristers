@@ -8,18 +8,35 @@ function required(name: string): string {
   return value;
 }
 
+/** Hosts safe for plaintext / unverified TLS (docker ↔ local Postfix only). */
+function isLocalSmtpHost(host: string): boolean {
+  const normalized = host.trim().toLowerCase();
+  return (
+    normalized === "localhost" ||
+    normalized === "127.0.0.1" ||
+    normalized === "::1" ||
+    normalized === "host.docker.internal"
+  );
+}
+
 export function getMailer() {
   const host = process.env.SMTP_HOST ?? "localhost";
   const port = Number(process.env.SMTP_PORT ?? "25");
   const secure = process.env.SMTP_SECURE === "true";
   const user = process.env.SMTP_USER;
   const pass = process.env.SMTP_PASS;
+  // Only honor TLS bypass for loopback/docker-internal SMTP, never for remote relays.
+  const ignoreTLS =
+    process.env.SMTP_IGNORE_TLS === "true" && isLocalSmtpHost(host);
 
   return nodemailer.createTransport({
     host,
     port,
     secure,
+    ignoreTLS,
+    requireTLS: process.env.SMTP_REQUIRE_TLS === "true",
     auth: user ? { user, pass } : undefined,
+    tls: ignoreTLS ? { rejectUnauthorized: false } : undefined,
   });
 }
 
