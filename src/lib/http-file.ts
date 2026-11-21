@@ -1,8 +1,8 @@
-import { open, readFile } from "fs/promises";
-import { NextResponse } from "next/server";
+import { createReadStream } from "fs";
+import type { NextApiRequest, NextApiResponse } from "next";
 
-function parseByteRange(
-  rangeHeader: string | null,
+export function parseByteRange(
+  rangeHeader: string | null | undefined,
   size: number,
 ): { start: number; end: number } | "invalid" | null {
   if (!rangeHeader) return null;
@@ -34,36 +34,24 @@ function parseByteRange(
   return { start, end };
 }
 
-async function readFileSlice(
-  absolutePath: string,
-  start: number,
-  end: number,
-): Promise<Uint8Array> {
-  const length = end - start + 1;
-  const handle = await open(absolutePath, "r");
-  try {
-    const buffer = Buffer.alloc(length);
-    const { bytesRead } = await handle.read(buffer, 0, length, start);
-    return bytesRead === length ? buffer : buffer.subarray(0, bytesRead);
-  } finally {
-    await handle.close();
-  }
-}
-
-/**
- * Serve a local file with Content-Length + Accept-Ranges so media players can
- * seek and track position. Uses buffered bodies (not Node streams) because
- * Next.js drops Content-Length on streamed responses and falls back to chunked
- * transfer, which breaks HTML5 audio progress/seek.
- */
-export async function streamLocalFile(input: {
+type SendLocalFileInput = {
   absolutePath: string;
   size: number;
   contentType: string;
   contentDisposition: string;
   cacheControl: string;
-  rangeHeader?: string | null;
-}): Promise<NextResponse> {
+};
+
+/**
+ * Stream a local file through a Pages API Node response with Content-Length
+ * and Accept-Ranges. App Router Route Handlers strip Content-Length and force
+ * chunked transfer, which breaks HTML5 audio duration/seek/progress.
+ */
+export function sendLocalFile(
+  req: NextApiRequest,
+  res: NextApiResponse,
+  input: SendLocalFileInput,
+): void {
   const common = {
     "Content-Type": input.contentType,
     "Content-Disposition": input.contentDisposition,
@@ -72,37 +60,35 @@ export async function streamLocalFile(input: {
     "Cache-Control": input.cacheControl,
   };
 
-  const parsed = parseByteRange(input.rangeHeader ?? null, input.size);
+  const rangeHeader = Array.isArray(req.headers.range)
+    ? req.headers.range[0]
+    : req.headers.range;
+  const parsed = parseByteRange(rangeHeader, input.size);
+
   if (parsed === "invalid") {
-    return new NextResponse(null, {
-      status: 416,
-      headers: {
-        ...common,
-        "Content-Range": `bytes */${input.size}`,
-      },
+    res.writeHead(416, {
+      ...common,
+      "Content-Range": `bytes */${input.size}`,
     });
+    res.end();
+    return;
   }
 
   if (!parsed) {
-    const body = await readFile(input.absolutePath);
-    return new NextResponse(new Uint8Array(body), {
-      status: 200,
-      headers: {
-        ...common,
-        "Content-Length": String(body.byteLength),
-      },
+    res.writeHead(200, {
+      ...common,
+      "Content-Length": input.size,
     });
+    createReadStream(input.absolutePath).pipe(res);
+    return;
   }
 
   const { start, end } = parsed;
-  const body = await readFileSlice(input.absolutePath, start, end);
-
-  return new NextResponse(new Uint8Array(body), {
-    status: 206,
-    headers: {
-      ...common,
-      "Content-Length": String(body.byteLength),
-      "Content-Range": `bytes ${start}-${end}/${input.size}`,
-    },
+  const chunkSize = end - start + 1;
+  res.writeHead(206, {
+    ...common,
+    "Content-Length": chunkSize,
+    "Content-Range": `bytes ${start}-${end}/${input.size}`,
   });
+  createReadStream(input.absolutePath, { start, end }).pipe(res);
 }

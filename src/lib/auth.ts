@@ -153,9 +153,9 @@ export async function destroySession(): Promise<void> {
   });
 }
 
-export async function getCurrentUser(): Promise<SessionUser | null> {
-  const jar = await cookies();
-  const raw = jar.get(SESSION_COOKIE)?.value;
+async function userFromSessionToken(
+  raw: string | undefined,
+): Promise<SessionUser | null> {
   if (!raw) return null;
 
   const row = await db.query.sessions.findFirst({
@@ -179,6 +179,20 @@ export async function getCurrentUser(): Promise<SessionUser | null> {
     status: user.status,
   };
 }
+
+export async function getCurrentUser(): Promise<SessionUser | null> {
+  const jar = await cookies();
+  return userFromSessionToken(jar.get(SESSION_COOKIE)?.value);
+}
+
+/** Resolve the signed-in user from a Pages API cookie jar. */
+export async function getCurrentUserFromCookie(
+  cookieValue: string | undefined,
+): Promise<SessionUser | null> {
+  return userFromSessionToken(cookieValue);
+}
+
+export const sessionCookieName = SESSION_COOKIE;
 
 export async function requireUser(): Promise<SessionUser> {
   const user = await getCurrentUser();
