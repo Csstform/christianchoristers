@@ -448,12 +448,80 @@ a {
   max-width: 720px;
 }
 
-.album-local-player audio {
+.album-local-player .muted {
+  margin: 0.4rem 0 0;
+}
+
+.waveform-player {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.75rem;
+  align-items: center;
   width: 100%;
 }
 
-.album-local-player .muted {
-  margin: 0.4rem 0 0;
+.waveform-player__play {
+  appearance: none;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--ink) 92%, white);
+  color: var(--white);
+  border-radius: 999px;
+  min-width: 4.25rem;
+  padding: 0.45rem 0.85rem;
+  font: inherit;
+  font-size: 0.85rem;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+}
+
+.waveform-player__play:hover {
+  background: var(--ink);
+}
+
+.waveform-player__body {
+  min-width: 0;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.waveform-player__track {
+  position: relative;
+  height: 3.5rem;
+  border-radius: 0.55rem;
+  background: color-mix(in srgb, var(--ink) 5%, transparent);
+  border: 1px solid var(--line);
+  overflow: hidden;
+  cursor: pointer;
+  touch-action: none;
+}
+
+.waveform-player__track:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.waveform-player__canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.waveform-player__status {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+  pointer-events: none;
+}
+
+.waveform-player__times {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
 }
 
 .recording-embed {
@@ -772,8 +840,8 @@ a {
   gap: 0.35rem;
 }
 
-.song-assets audio {
-  width: 100%;
+.song-assets .waveform-player {
+  margin-top: 0.15rem;
 }
 
 .music-actions {

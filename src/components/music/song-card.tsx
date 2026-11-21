@@ -1,5 +1,6 @@
 import type { SessionUser } from "@/lib/auth";
 import { canSetRepertoire, canUpload } from "@/lib/roles";
+import { WaveformPlayer } from "@/components/audio/waveform-player";
 import { SongAssetDelete } from "@/components/music/song-asset-delete";
 import { SongAssetUpload } from "@/components/music/song-asset-upload";
 import { SongStatusButtons } from "@/components/music/song-status-buttons";
@@ -76,13 +77,10 @@ export function SongCard({
                   <a href={`/api/music/assets/${asset.id}`}>
                     {asset.label || "Rehearsal audio"}
                   </a>
-                  <audio
-                    controls
-                    preload="metadata"
+                  <WaveformPlayer
                     src={`/api/music/assets/${asset.id}`}
-                  >
-                    <track kind="captions" />
-                  </audio>
+                    label={asset.label || "Rehearsal audio"}
+                  />
                   {uploader ? <SongAssetDelete assetId={asset.id} /> : null}
                 </li>
               ))}
