@@ -15,6 +15,13 @@
       "when": 1795214933848,
       "tag": "0001_album_streaming_fields",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1795245600000,
+      "tag": "0002_password_reset_tokens",
+      "breakpoints": true
     }
   ]
 }
