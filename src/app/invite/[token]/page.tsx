@@ -7,7 +7,7 @@ import { acceptInviteAction, type ActionResult } from "@/lib/actions";
 
 export default function InvitePage() {
   const params = useParams<{ token: string }>();
-  const token = params.token;
+  const token = params?.token ?? "";
   const boundAction = acceptInviteAction.bind(null, token);
   const [state, formAction, pending] = useActionState<ActionResult | null, FormData>(
     boundAction,
