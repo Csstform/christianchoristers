@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import {
   acceptInvite,
@@ -71,6 +72,7 @@ export async function inviteUserAction(
 
   try {
     const { inviteUrl } = await createInvite({ email, name, role });
+    revalidatePath("/app/admin");
     return {
       ok: true,
       message: `Invite created for ${email}. Set-password link: ${inviteUrl}`,
