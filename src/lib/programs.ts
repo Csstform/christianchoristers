@@ -1,35 +1,35 @@
 import { and, asc, desc, eq, gte, lt } from "drizzle-orm";
 import { db } from "@/db";
-import { concerts, rsvps, users } from "@/db/schema";
+import { programs, rsvps, users } from "@/db/schema";
 
 export type YesNo = "yes" | "no";
 
-export async function listConcerts() {
-  return db.select().from(concerts).orderBy(asc(concerts.startsAt));
+export async function listPrograms() {
+  return db.select().from(programs).orderBy(asc(programs.startsAt));
 }
 
-export async function listUpcomingConcerts() {
+export async function listUpcomingPrograms() {
   return db
     .select()
-    .from(concerts)
-    .where(gte(concerts.startsAt, new Date()))
-    .orderBy(asc(concerts.startsAt));
+    .from(programs)
+    .where(gte(programs.startsAt, new Date()))
+    .orderBy(asc(programs.startsAt));
 }
 
-export async function listPastConcerts() {
+export async function listPastPrograms() {
   return db
     .select()
-    .from(concerts)
-    .where(lt(concerts.startsAt, new Date()))
-    .orderBy(desc(concerts.startsAt));
+    .from(programs)
+    .where(lt(programs.startsAt, new Date()))
+    .orderBy(desc(programs.startsAt));
 }
 
-export async function getConcert(id: string) {
-  const [row] = await db.select().from(concerts).where(eq(concerts.id, id)).limit(1);
+export async function getProgram(id: string) {
+  const [row] = await db.select().from(programs).where(eq(programs.id, id)).limit(1);
   return row ?? null;
 }
 
-export async function createConcert(input: {
+export async function createProgram(input: {
   title: string;
   location?: string;
   startsAt: Date;
@@ -44,7 +44,7 @@ export async function createConcert(input: {
   }
 
   const [row] = await db
-    .insert(concerts)
+    .insert(programs)
     .values({
       title,
       location: input.location?.trim() || null,
@@ -57,7 +57,7 @@ export async function createConcert(input: {
   return row;
 }
 
-export async function updateConcert(
+export async function updateProgram(
   id: string,
   input: {
     title: string;
@@ -74,7 +74,7 @@ export async function updateConcert(
   }
 
   const [row] = await db
-    .update(concerts)
+    .update(programs)
     .set({
       title,
       location: input.location?.trim() || null,
@@ -83,22 +83,22 @@ export async function updateConcert(
       details: input.details?.trim() || null,
       updatedAt: new Date(),
     })
-    .where(eq(concerts.id, id))
+    .where(eq(programs.id, id))
     .returning();
-  if (!row) throw new Error("Concert not found.");
+  if (!row) throw new Error("Program not found.");
   return row;
 }
 
-export async function deleteConcert(id: string) {
-  const [row] = await db.delete(concerts).where(eq(concerts.id, id)).returning();
+export async function deleteProgram(id: string) {
+  const [row] = await db.delete(programs).where(eq(programs.id, id)).returning();
   return row ?? null;
 }
 
-export async function listRsvpsForConcert(concertId: string) {
+export async function listRsvpsForProgram(programId: string) {
   return db
     .select({
       id: rsvps.id,
-      concertId: rsvps.concertId,
+      programId: rsvps.programId,
       userId: rsvps.userId,
       coming: rsvps.coming,
       practiceSaturday: rsvps.practiceSaturday,
@@ -114,15 +114,15 @@ export async function listRsvpsForConcert(concertId: string) {
     })
     .from(rsvps)
     .innerJoin(users, eq(rsvps.userId, users.id))
-    .where(eq(rsvps.concertId, concertId))
+    .where(eq(rsvps.programId, programId))
     .orderBy(asc(users.name));
 }
 
-export async function getUserRsvp(concertId: string, userId: string) {
+export async function getUserRsvp(programId: string, userId: string) {
   const [row] = await db
     .select()
     .from(rsvps)
-    .where(and(eq(rsvps.concertId, concertId), eq(rsvps.userId, userId)))
+    .where(and(eq(rsvps.programId, programId), eq(rsvps.userId, userId)))
     .limit(1);
   return row ?? null;
 }
@@ -176,7 +176,7 @@ export function rsvpInputFromForm(formData: FormData) {
 }
 
 export async function upsertRsvp(input: {
-  concertId: string;
+  programId: string;
   userId: string;
   coming: YesNo;
   practiceSaturday: YesNo;
@@ -187,7 +187,7 @@ export async function upsertRsvp(input: {
   housingPeople?: number | null;
   notes?: string | null;
 }) {
-  const existing = await getUserRsvp(input.concertId, input.userId);
+  const existing = await getUserRsvp(input.programId, input.userId);
   if (existing) {
     const [row] = await db
       .update(rsvps)
@@ -210,7 +210,7 @@ export async function upsertRsvp(input: {
   const [row] = await db
     .insert(rsvps)
     .values({
-      concertId: input.concertId,
+      programId: input.programId,
       userId: input.userId,
       coming: input.coming,
       practiceSaturday: input.practiceSaturday,
@@ -225,7 +225,7 @@ export async function upsertRsvp(input: {
   return row;
 }
 
-export function formatConcertWhen(startsAt: Date, endsAt?: Date | null): string {
+export function formatProgramWhen(startsAt: Date, endsAt?: Date | null): string {
   const opts: Intl.DateTimeFormatOptions = {
     timeZone: "America/Detroit",
     weekday: "short",
@@ -245,7 +245,7 @@ export function formatConcertWhen(startsAt: Date, endsAt?: Date | null): string 
 }
 
 /** Compact calendar chip parts for public schedule cards (America/Detroit). */
-export function formatConcertDateParts(startsAt: Date): {
+export function formatProgramDateParts(startsAt: Date): {
   month: string;
   day: string;
   weekday: string;

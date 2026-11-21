@@ -5,9 +5,9 @@ import { AppNav } from "@/components/app-nav";
 import { listAnnouncements } from "@/lib/announcements";
 import { getCurrentUser } from "@/lib/auth";
 import {
-  formatConcertWhen,
-  listUpcomingConcerts,
-} from "@/lib/concerts";
+  formatProgramWhen,
+  listUpcomingPrograms,
+} from "@/lib/programs";
 import { canPostAnnouncements } from "@/lib/roles";
 
 export default async function AppHomePage() {
@@ -16,10 +16,10 @@ export default async function AppHomePage() {
 
   const [announcements, upcoming] = await Promise.all([
     listAnnouncements(5),
-    listUpcomingConcerts(),
+    listUpcomingPrograms(),
   ]);
   const canPost = canPostAnnouncements(user.role);
-  const nextConcerts = upcoming.slice(0, 3);
+  const nextPrograms = upcoming.slice(0, 3);
 
   return (
     <>
@@ -39,23 +39,23 @@ export default async function AppHomePage() {
         </section>
         <section className="app-card">
           <div className="home-card-head">
-            <h2>Upcoming concerts</h2>
+            <h2>Upcoming programs</h2>
             <Link href="/app/calendar">Calendar</Link>
           </div>
-          {nextConcerts.length === 0 ? (
-            <p className="muted">No upcoming concerts yet.</p>
+          {nextPrograms.length === 0 ? (
+            <p className="muted">No upcoming programs yet.</p>
           ) : (
             <div className="song-list">
-              {nextConcerts.map((concert) => (
-                <article key={concert.id} className="home-concert">
+              {nextPrograms.map((program) => (
+                <article key={program.id} className="home-program">
                   <h3>
-                    <Link href={`/app/calendar/${concert.id}`}>
-                      {concert.title}
+                    <Link href={`/app/calendar/${program.id}`}>
+                      {program.title}
                     </Link>
                   </h3>
                   <p className="muted">
-                    {formatConcertWhen(concert.startsAt, concert.endsAt)}
-                    {concert.location ? ` · ${concert.location}` : ""}
+                    {formatProgramWhen(program.startsAt, program.endsAt)}
+                    {program.location ? ` · ${program.location}` : ""}
                   </p>
                 </article>
               ))}

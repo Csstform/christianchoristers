@@ -1,20 +1,20 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { AppNav } from "@/components/app-nav";
-import { ConcertEditForm } from "@/components/calendar/concert-edit-form";
+import { ProgramEditForm } from "@/components/calendar/program-edit-form";
 import { RsvpForm } from "@/components/calendar/rsvp-form";
 import { RsvpTable } from "@/components/calendar/rsvp-table";
 import { getCurrentUser } from "@/lib/auth";
 import {
-  formatConcertWhen,
-  getConcert,
+  formatProgramWhen,
+  getProgram,
   getUserRsvp,
-  listRsvpsForConcert,
+  listRsvpsForProgram,
   toDatetimeLocalValue,
-} from "@/lib/concerts";
-import { canManageConcerts } from "@/lib/roles";
+} from "@/lib/programs";
+import { canManagePrograms } from "@/lib/roles";
 
-export default async function ConcertDetailPage({
+export default async function ProgramDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>;
@@ -23,14 +23,14 @@ export default async function ConcertDetailPage({
   if (!user) redirect("/login");
 
   const { id } = await params;
-  const concert = await getConcert(id);
-  if (!concert) notFound();
+  const program = await getProgram(id);
+  if (!program) notFound();
 
   const [mine, all] = await Promise.all([
-    getUserRsvp(concert.id, user.id),
-    listRsvpsForConcert(concert.id),
+    getUserRsvp(program.id, user.id),
+    listRsvpsForProgram(program.id),
   ]);
-  const manager = canManageConcerts(user.role);
+  const manager = canManagePrograms(user.role);
 
   return (
     <>
@@ -41,12 +41,12 @@ export default async function ConcertDetailPage({
         </p>
         <div className="music-library__intro">
           <div>
-            <h2>{concert.title}</h2>
+            <h2>{program.title}</h2>
             <p className="muted">
-              {formatConcertWhen(concert.startsAt, concert.endsAt)}
-              {concert.location ? ` · ${concert.location}` : ""}
+              {formatProgramWhen(program.startsAt, program.endsAt)}
+              {program.location ? ` · ${program.location}` : ""}
             </p>
-            {concert.details ? <p>{concert.details}</p> : null}
+            {program.details ? <p>{program.details}</p> : null}
           </div>
         </div>
 
@@ -54,7 +54,7 @@ export default async function ConcertDetailPage({
           <h3>Your RSVP</h3>
           <RsvpForm
             key={mine?.updatedAt?.toISOString() ?? "new-rsvp"}
-            concertId={concert.id}
+            programId={program.id}
             defaults={{
               coming: mine?.coming ?? "no",
               practiceSaturday: mine?.practiceSaturday ?? "no",
@@ -76,17 +76,17 @@ export default async function ConcertDetailPage({
 
         {manager ? (
           <details className="music-details">
-            <summary>Edit concert</summary>
-            <ConcertEditForm
-              concertId={concert.id}
+            <summary>Edit program</summary>
+            <ProgramEditForm
+              programId={program.id}
               defaults={{
-                title: concert.title,
-                location: concert.location ?? "",
-                startsAt: toDatetimeLocalValue(concert.startsAt),
-                endsAt: concert.endsAt
-                  ? toDatetimeLocalValue(concert.endsAt)
+                title: program.title,
+                location: program.location ?? "",
+                startsAt: toDatetimeLocalValue(program.startsAt),
+                endsAt: program.endsAt
+                  ? toDatetimeLocalValue(program.endsAt)
                   : "",
-                details: concert.details ?? "",
+                details: program.details ?? "",
               }}
             />
           </details>

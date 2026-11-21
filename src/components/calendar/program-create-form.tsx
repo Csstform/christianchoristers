@@ -2,21 +2,21 @@
 
 import { useActionState } from "react";
 import {
-  createConcertAction,
-  type ConcertActionResult,
-} from "@/lib/concert-actions";
+  createProgramAction,
+  type ProgramActionResult,
+} from "@/lib/program-actions";
 
-export function ConcertCreateForm() {
+export function ProgramCreateForm() {
   const [state, formAction, pending] = useActionState<
-    ConcertActionResult | null,
+    ProgramActionResult | null,
     FormData
-  >(createConcertAction, null);
+  >(createProgramAction, null);
 
   return (
     <form className="form music-form" action={formAction}>
       <label>
         Title
-        <input name="title" required placeholder="Concert or weekend title" />
+        <input name="title" required placeholder="Program or weekend title" />
       </label>
       <label>
         Location
@@ -41,7 +41,7 @@ export function ConcertCreateForm() {
       </p>
       {state && !state.ok ? <p className="form-error">{state.error}</p> : null}
       <button className="btn btn-dark" type="submit" disabled={pending}>
-        {pending ? "Creating…" : "Create concert"}
+        {pending ? "Creating…" : "Create program"}
       </button>
     </form>
   );

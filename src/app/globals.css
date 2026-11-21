@@ -1157,13 +1157,13 @@ a {
   font-size: 0.92rem;
 }
 
-.home-concert h3 {
+.home-program h3 {
   margin: 0;
   font-family: var(--font-display), Georgia, serif;
   font-size: 1.15rem;
 }
 
-.home-concert + .home-concert {
+.home-program + .home-program {
   margin-top: 0.85rem;
   padding-top: 0.85rem;
   border-top: 1px solid var(--line);
