@@ -12,7 +12,8 @@ Scraped `christianchoristers.com` from the droplet (2026-11-21, America/Detroit)
 | `/membership-login/` | `/login` |
 | `/member-homepage/` | `/app` (members) |
 | `/sheet-music/` | `/app/music` (member repertoire) |
-| Password reset / profile | **Not built** (admin re-invite only) |
+| Password reset | `/forgot-password` + `/reset-password/[token]` |
+| Profile | **Not built** |
 
 No separate About, Contact, or Schedule pages appear in the live main menu.
 

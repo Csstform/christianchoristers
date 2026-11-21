@@ -11,6 +11,10 @@ import {
 } from "@/lib/auth";
 import { canManageUsers } from "@/lib/roles";
 import { safeAppPath } from "@/lib/paths";
+import {
+  requestPasswordReset,
+  resetPasswordWithToken,
+} from "@/lib/password-reset";
 import type { UserRole } from "@/db/schema";
 
 export type ActionResult = { ok: true; message?: string } | { ok: false; error: string };
@@ -54,6 +58,44 @@ export async function acceptInviteAction(
     return {
       ok: false,
       error: error instanceof Error ? error.message : "Invite failed.",
+    };
+  }
+  redirect("/app");
+}
+
+export async function requestPasswordResetAction(
+  _prev: ActionResult | null,
+  formData: FormData,
+): Promise<ActionResult> {
+  const email = String(formData.get("email") ?? "");
+  try {
+    const { message } = await requestPasswordReset(email);
+    return { ok: true, message };
+  } catch (error) {
+    return {
+      ok: false,
+      error:
+        error instanceof Error ? error.message : "Could not start password reset.",
+    };
+  }
+}
+
+export async function resetPasswordAction(
+  token: string,
+  _prev: ActionResult | null,
+  formData: FormData,
+): Promise<ActionResult> {
+  const password = String(formData.get("password") ?? "");
+  const confirm = String(formData.get("confirm") ?? "");
+  if (password !== confirm) {
+    return { ok: false, error: "Passwords do not match." };
+  }
+  try {
+    await resetPasswordWithToken({ token, password });
+  } catch (error) {
+    return {
+      ok: false,
+      error: error instanceof Error ? error.message : "Reset failed.",
     };
   }
   redirect("/app");

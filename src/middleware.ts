@@ -16,7 +16,12 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL(next, request.url));
   }
 
-  if (pathname.startsWith("/invite/") && session) {
+  if (
+    (pathname.startsWith("/invite/") ||
+      pathname === "/forgot-password" ||
+      pathname.startsWith("/reset-password/")) &&
+    session
+  ) {
     return NextResponse.redirect(new URL("/app", request.url));
   }
 
@@ -24,5 +29,11 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/app/:path*", "/login", "/invite/:path*"],
+  matcher: [
+    "/app/:path*",
+    "/login",
+    "/invite/:path*",
+    "/forgot-password",
+    "/reset-password/:path*",
+  ],
 };

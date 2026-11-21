@@ -89,6 +89,33 @@ If you did not expect this email, you can ignore it.`;
   }
 }
 
+export async function sendPasswordResetEmail(input: {
+  to: string;
+  name: string;
+  resetUrl: string;
+}) {
+  const subject = "Reset your Christian Choristers password";
+  const text = `Hello ${input.name},
+
+We received a request to reset your Christian Choristers member password.
+
+Reset it here (expires in 1 hour):
+${input.resetUrl}
+
+If you did not request this, you can ignore this email.`;
+
+  try {
+    if (!process.env.SMTP_HOST && process.env.NODE_ENV !== "production") {
+      console.info("[mail:dev] password reset email", input);
+      return { accepted: [input.to], messageId: "dev-skip" };
+    }
+    return await sendMail({ to: input.to, subject, text });
+  } catch (error) {
+    console.error("[mail] failed to send password reset", error);
+    throw error;
+  }
+}
+
 export function appBaseUrl(): string {
   return (
     process.env.APP_BASE_URL ??
