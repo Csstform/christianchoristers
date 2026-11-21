@@ -73,7 +73,7 @@ export default async function MusicPage() {
                     <div className="album-local-player">
                       <audio
                         controls
-                        preload="none"
+                        preload="metadata"
                         src={`/api/catalog/albums/${album.slug}/audio`}
                       >
                         Your browser does not support audio playback.

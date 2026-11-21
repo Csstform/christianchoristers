@@ -76,7 +76,11 @@ export function SongCard({
                   <a href={`/api/music/assets/${asset.id}`}>
                     {asset.label || "Rehearsal audio"}
                   </a>
-                  <audio controls preload="none" src={`/api/music/assets/${asset.id}`}>
+                  <audio
+                    controls
+                    preload="metadata"
+                    src={`/api/music/assets/${asset.id}`}
+                  >
                     <track kind="captions" />
                   </audio>
                   {uploader ? <SongAssetDelete assetId={asset.id} /> : null}

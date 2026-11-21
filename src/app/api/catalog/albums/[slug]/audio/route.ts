@@ -1,16 +1,15 @@
-import { createReadStream } from "fs";
 import { stat } from "fs/promises";
 import { NextResponse } from "next/server";
-import { Readable } from "stream";
 import {
   albumBySlug,
   contentTypeForAlbumAudio,
   safeAlbumAudioPath,
 } from "@/lib/catalog-audio";
+import { streamLocalFile } from "@/lib/http-file";
 import { absoluteUploadPath } from "@/lib/storage";
 
 export async function GET(
-  _request: Request,
+  request: Request,
   context: { params: Promise<{ slug: string }> },
 ) {
   const { slug } = await context.params;
@@ -25,25 +24,25 @@ export async function GET(
   }
 
   const absolute = absoluteUploadPath(safe);
+  let size = 0;
   try {
     const info = await stat(absolute);
     if (!info.isFile()) {
       return NextResponse.json({ error: "Missing file" }, { status: 404 });
     }
+    size = info.size;
   } catch {
     return NextResponse.json({ error: "Missing file" }, { status: 404 });
   }
 
   const filename = safe.split("/").pop() || "album.mp3";
-  const nodeStream = createReadStream(absolute);
-  const webStream = Readable.toWeb(nodeStream) as ReadableStream;
 
-  return new NextResponse(webStream, {
-    headers: {
-      "Content-Type": contentTypeForAlbumAudio(safe),
-      "Content-Disposition": `inline; filename="${filename}"`,
-      "X-Content-Type-Options": "nosniff",
-      "Cache-Control": "public, max-age=3600",
-    },
+  return streamLocalFile({
+    absolutePath: absolute,
+    size,
+    contentType: contentTypeForAlbumAudio(safe),
+    contentDisposition: `inline; filename="${filename}"`,
+    cacheControl: "public, max-age=3600",
+    rangeHeader: request.headers.get("range"),
   });
 }

@@ -1,14 +1,13 @@
-import { createReadStream } from "fs";
 import { stat } from "fs/promises";
 import { NextResponse } from "next/server";
-import { Readable } from "stream";
 import { getCurrentUser } from "@/lib/auth";
 import { contentTypeForAsset } from "@/lib/file-validation";
+import { streamLocalFile } from "@/lib/http-file";
 import { getSongAsset } from "@/lib/music";
 import { absoluteUploadPath } from "@/lib/storage";
 
 export async function GET(
-  _request: Request,
+  request: Request,
   context: { params: Promise<{ id: string }> },
 ) {
   const user = await getCurrentUser();
@@ -23,11 +22,13 @@ export async function GET(
   }
 
   const absolute = absoluteUploadPath(asset.storagePath);
+  let size = 0;
   try {
     const info = await stat(absolute);
     if (!info.isFile()) {
       return NextResponse.json({ error: "Missing file" }, { status: 404 });
     }
+    size = info.size;
   } catch {
     return NextResponse.json({ error: "Missing file" }, { status: 404 });
   }
@@ -43,22 +44,12 @@ export async function GET(
     mimeType: asset.mimeType,
   });
 
-  // PDFs can render inline safely with a forced type + nosniff.
-  // Never trust uploader-controlled mime types for execution.
-  const disposition =
-    asset.kind === "sheet_pdf"
-      ? `inline; filename="${filename}"`
-      : `inline; filename="${filename}"`;
-
-  const nodeStream = createReadStream(absolute);
-  const webStream = Readable.toWeb(nodeStream) as ReadableStream;
-
-  return new NextResponse(webStream, {
-    headers: {
-      "Content-Type": contentType,
-      "Content-Disposition": disposition,
-      "X-Content-Type-Options": "nosniff",
-      "Cache-Control": "private, max-age=3600",
-    },
+  return streamLocalFile({
+    absolutePath: absolute,
+    size,
+    contentType,
+    contentDisposition: `inline; filename="${filename}"`,
+    cacheControl: "private, max-age=3600",
+    rangeHeader: request.headers.get("range"),
   });
 }
