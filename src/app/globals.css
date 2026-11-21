@@ -106,20 +106,24 @@ a {
   position: relative;
   overflow: hidden;
   color: var(--white);
-  background:
-    linear-gradient(180deg, rgba(12, 20, 34, 0.28) 0%, rgba(12, 20, 34, 0.78) 100%),
-    url("/hero.svg") center/cover no-repeat,
-    linear-gradient(135deg, #1c2d4a, #0f1728);
+  background: #0f1728;
 }
 
-.hero::after {
-  content: "";
+.hero__image {
+  object-fit: cover;
+  object-position: center 28%;
+  z-index: 0;
+  animation: hero-zoom 18s ease-in-out infinite alternate;
+}
+
+.hero__shade {
   position: absolute;
-  inset: auto -10% -20% 40%;
-  height: 50%;
-  background: radial-gradient(circle, rgba(201, 164, 106, 0.28), transparent 65%);
+  inset: 0;
+  z-index: 1;
   pointer-events: none;
-  animation: drift 12s ease-in-out infinite alternate;
+  background:
+    linear-gradient(180deg, rgba(12, 20, 34, 0.22) 0%, rgba(12, 20, 34, 0.55) 48%, rgba(12, 20, 34, 0.88) 100%),
+    radial-gradient(circle at 70% 80%, rgba(201, 164, 106, 0.18), transparent 55%);
 }
 
 .hero__content {
@@ -127,7 +131,7 @@ a {
   width: 100%;
   margin: 0 auto;
   position: relative;
-  z-index: 1;
+  z-index: 2;
   animation: rise 900ms ease-out both;
 }
 
@@ -935,6 +939,21 @@ a {
   }
   to {
     transform: translate3d(-40px, -18px, 0);
+  }
+}
+
+@keyframes hero-zoom {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.06);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero__image {
+    animation: none;
   }
 }
 

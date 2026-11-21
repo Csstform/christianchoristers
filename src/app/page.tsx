@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { PublicShell } from "@/components/public-shell";
 import { streamingLinks } from "@/data/streaming-links";
@@ -6,6 +7,15 @@ export default function HomePage() {
   return (
     <PublicShell>
       <section className="hero">
+        <Image
+          src="/hero-choir.jpg"
+          alt="The Christian Choristers"
+          fill
+          priority
+          sizes="100vw"
+          className="hero__image"
+        />
+        <div className="hero__shade" aria-hidden />
         <div className="hero__content">
           <h1 className="hero__brand">Christian Choristers</h1>
           <p className="hero__lede">
