@@ -1,10 +1,9 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   updateAlbumStreamingAction,
-  uploadAlbumAudioAction,
   type CatalogActionResult,
 } from "@/lib/catalog-actions";
 import type { PublicAlbum } from "@/lib/catalog";
@@ -18,22 +17,20 @@ export function AlbumStreamingForm({
 }) {
   const router = useRouter();
   const updateAction = updateAlbumStreamingAction.bind(null, album.id);
-  const uploadAction = uploadAlbumAudioAction.bind(null, album.id);
 
   const [updateState, updateFormAction, updatePending] = useActionState<
     CatalogActionResult | null,
     FormData
   >(updateAction, null);
-  const [uploadState, uploadFormAction, uploadPending] = useActionState<
-    CatalogActionResult | null,
-    FormData
-  >(uploadAction, null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [uploadOk, setUploadOk] = useState<string | null>(null);
+  const [uploading, startUpload] = useTransition();
 
   useEffect(() => {
-    if (updateState?.ok || uploadState?.ok) {
+    if (updateState?.ok) {
       router.refresh();
     }
-  }, [updateState, uploadState, router]);
+  }, [updateState, router]);
 
   return (
     <article className="song-card catalog-album-card">
@@ -108,23 +105,58 @@ export function AlbumStreamingForm({
         </button>
       </form>
 
-      <form className="form music-form" action={uploadFormAction}>
+      <form
+        className="form music-form"
+        onSubmit={(event) => {
+          event.preventDefault();
+          const form = event.currentTarget;
+          const data = new FormData(form);
+          setUploadError(null);
+          setUploadOk(null);
+          startUpload(async () => {
+            try {
+              const response = await fetch(
+                `/api/admin/catalog/albums/${album.id}/audio`,
+                {
+                  method: "POST",
+                  body: data,
+                  credentials: "same-origin",
+                },
+              );
+              const payload = (await response.json().catch(() => null)) as
+                | { ok?: boolean; error?: string }
+                | null;
+              if (!response.ok || !payload?.ok) {
+                throw new Error(payload?.error || "Upload failed.");
+              }
+              form.reset();
+              setUploadOk("Local streaming audio saved.");
+              router.refresh();
+            } catch (error) {
+              setUploadError(
+                error instanceof Error ? error.message : "Upload failed.",
+              );
+            }
+          });
+        }}
+      >
         <label>
           Local streaming audio (optional)
-          <input name="file" type="file" accept="audio/*,.mp3,.wav,.m4a,.aac,.ogg" />
+          <input
+            name="file"
+            type="file"
+            accept="audio/*,.mp3,.wav,.m4a,.aac,.ogg"
+            required
+          />
         </label>
         <p className="muted">
           Used when Spotify is empty. Replaces any existing local file for this
           album.
         </p>
-        {uploadState?.ok ? (
-          <p className="form-ok">{uploadState.message}</p>
-        ) : null}
-        {uploadState && !uploadState.ok ? (
-          <p className="form-error">{uploadState.error}</p>
-        ) : null}
-        <button className="btn btn-quiet" type="submit" disabled={uploadPending}>
-          {uploadPending ? "Uploading…" : "Upload local audio"}
+        {uploadOk ? <p className="form-ok">{uploadOk}</p> : null}
+        {uploadError ? <p className="form-error">{uploadError}</p> : null}
+        <button className="btn btn-quiet" type="submit" disabled={uploading}>
+          {uploading ? "Uploading…" : "Upload local audio"}
         </button>
       </form>
     </article>

@@ -2,11 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/auth";
-import {
-  getAlbumById,
-  saveAlbumLocalAudio,
-  updateAlbumStreaming,
-} from "@/lib/catalog";
+import { updateAlbumStreaming } from "@/lib/catalog";
 import { canUpload } from "@/lib/roles";
 
 export type CatalogActionResult =
@@ -55,42 +51,6 @@ export async function updateAlbumStreamingAction(
         error instanceof Error
           ? error.message
           : "Could not update album streaming.",
-    };
-  }
-}
-
-export async function uploadAlbumAudioAction(
-  albumId: string,
-  _prev: CatalogActionResult | null,
-  formData: FormData,
-): Promise<CatalogActionResult> {
-  try {
-    await requireUploader();
-    const album = await getAlbumById(albumId);
-    if (!album) throw new Error("Album not found.");
-
-    const file = formData.get("file");
-    if (!(file instanceof File) || file.size === 0) {
-      throw new Error("Choose an audio file to upload.");
-    }
-
-    const buffer = Buffer.from(await file.arrayBuffer());
-    await saveAlbumLocalAudio({
-      albumId,
-      filename: file.name,
-      buffer,
-    });
-
-    revalidatePath("/music");
-    revalidatePath("/app/admin/music");
-    return { ok: true, message: "Local streaming audio saved." };
-  } catch (error) {
-    return {
-      ok: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : "Could not upload album audio.",
     };
   }
 }
