@@ -830,7 +830,7 @@ a {
   padding-top: 0.9rem;
 }
 
-.song-part__title {
+.song-card h4.song-part__title {
   margin: 0 0 0.65rem;
   font-family: var(--font-display), Georgia, serif;
   font-size: 1.05rem;
