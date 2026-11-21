@@ -33,7 +33,9 @@ No separate About, Contact, or Schedule pages appear in the live main menu.
 | Remaining six albums | Not on public music page | Listed with Melt the Heart purchase links; Count Me In can local-stream |
 | “Our Back Catalog” title | Yes | Yes |
 
-**Still optional:** album cover art; Spotify (or other) embeds for the six non-Spotify titles when URLs exist.
+**Cover art:** added under `public/album-covers/` (from Melt the Heart product images).
+
+**Still optional:** Spotify (or other) embeds for the six non-Spotify titles when URLs exist.
 
 ## Live recordings
 

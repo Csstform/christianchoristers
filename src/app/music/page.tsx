@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { PublicShell } from "@/components/public-shell";
 import { albumSetUrl, albums } from "@/data/public-catalog";
 import { localAlbumAudioAvailable } from "@/lib/catalog-audio";
@@ -43,46 +44,62 @@ export default async function MusicPage() {
             return (
               <article
                 key={album.slug}
+                className="album-item"
                 style={{ animationDelay: `${index * 60}ms` }}
               >
-                <h3>{album.title}</h3>
-                {embedSrc ? (
-                  <div className="spotify-embed">
-                    <iframe
-                      src={embedSrc}
-                      title={`${album.title} on Spotify`}
-                      loading="lazy"
-                      allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                      allowFullScreen
-                    />
-                  </div>
-                ) : null}
-                {!embedSrc && hasLocal ? (
-                  <div className="album-local-player">
-                    <audio
-                      controls
-                      preload="none"
-                      src={`/api/catalog/albums/${album.slug}/audio`}
-                    >
-                      Your browser does not support audio playback.
-                    </audio>
-                    <p className="muted">Streaming from this server</p>
-                  </div>
-                ) : null}
-                {!embedSrc && !hasLocal ? (
-                  <p className="muted">Streaming coming soon</p>
-                ) : null}
-                <div className="album-links">
-                  {album.spotifyUrl ? (
-                    <a href={album.spotifyUrl} target="_blank" rel="noreferrer">
-                      Open on Spotify
-                    </a>
+                <div className="album-item__cover">
+                  <Image
+                    src={album.coverImage}
+                    alt={`${album.title} CD cover`}
+                    width={500}
+                    height={500}
+                    sizes="(max-width: 640px) 40vw, 160px"
+                  />
+                </div>
+                <div className="album-item__body">
+                  <h3>{album.title}</h3>
+                  {embedSrc ? (
+                    <div className="spotify-embed">
+                      <iframe
+                        src={embedSrc}
+                        title={`${album.title} on Spotify`}
+                        loading="lazy"
+                        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                        allowFullScreen
+                      />
+                    </div>
                   ) : null}
-                  {album.cdUrl ? (
-                    <a href={album.cdUrl} target="_blank" rel="noreferrer">
-                      Buy CD / MP3
-                    </a>
+                  {!embedSrc && hasLocal ? (
+                    <div className="album-local-player">
+                      <audio
+                        controls
+                        preload="none"
+                        src={`/api/catalog/albums/${album.slug}/audio`}
+                      >
+                        Your browser does not support audio playback.
+                      </audio>
+                      <p className="muted">Streaming from this server</p>
+                    </div>
                   ) : null}
+                  {!embedSrc && !hasLocal ? (
+                    <p className="muted">Streaming coming soon</p>
+                  ) : null}
+                  <div className="album-links">
+                    {album.spotifyUrl ? (
+                      <a
+                        href={album.spotifyUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        Open on Spotify
+                      </a>
+                    ) : null}
+                    {album.cdUrl ? (
+                      <a href={album.cdUrl} target="_blank" rel="noreferrer">
+                        Buy CD / MP3
+                      </a>
+                    ) : null}
+                  </div>
                 </div>
               </article>
             );

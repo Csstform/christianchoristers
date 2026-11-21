@@ -246,11 +246,43 @@ a {
   border-bottom: 1px solid var(--line);
 }
 
+.album-item {
+  display: grid;
+  grid-template-columns: minmax(96px, 160px) minmax(0, 1fr);
+  gap: 1.25rem 1.5rem;
+  align-items: start;
+}
+
+.album-item__cover {
+  margin: 0;
+}
+
+.album-item__cover img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 2px;
+  box-shadow: 0 10px 28px rgba(21, 34, 56, 0.14);
+}
+
+.album-item__body {
+  min-width: 0;
+}
+
 .album-list h3,
 .recording-list h3 {
   margin: 0 0 0.35rem;
   font-family: var(--font-display), Georgia, serif;
   font-size: 1.45rem;
+}
+
+@media (max-width: 560px) {
+  .album-item {
+    grid-template-columns: 96px minmax(0, 1fr);
+    gap: 1rem;
+  }
 }
 
 .album-set-link {
