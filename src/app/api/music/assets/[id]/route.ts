@@ -44,7 +44,7 @@ export async function GET(
     mimeType: asset.mimeType,
   });
 
-  return streamLocalFile({
+  return await streamLocalFile({
     absolutePath: absolute,
     size,
     contentType,

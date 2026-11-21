@@ -17,7 +17,7 @@ describe("streamLocalFile", () => {
   });
 
   it("returns 200 with Content-Length and Accept-Ranges", async () => {
-    const res = streamLocalFile({
+    const res = await streamLocalFile({
       absolutePath: path,
       size: body.length,
       contentType: "application/octet-stream",
@@ -32,7 +32,7 @@ describe("streamLocalFile", () => {
   });
 
   it("returns 206 for a byte range", async () => {
-    const res = streamLocalFile({
+    const res = await streamLocalFile({
       absolutePath: path,
       size: body.length,
       contentType: "application/octet-stream",
@@ -51,7 +51,7 @@ describe("streamLocalFile", () => {
   });
 
   it("returns 416 for an unsatisfiable range", async () => {
-    const res = streamLocalFile({
+    const res = await streamLocalFile({
       absolutePath: path,
       size: body.length,
       contentType: "application/octet-stream",

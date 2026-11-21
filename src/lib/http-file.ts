@@ -1,6 +1,5 @@
-import { createReadStream } from "fs";
+import { open, readFile } from "fs/promises";
 import { NextResponse } from "next/server";
-import { Readable } from "stream";
 
 function parseByteRange(
   rangeHeader: string | null,
@@ -35,15 +34,36 @@ function parseByteRange(
   return { start, end };
 }
 
-/** Stream a local file with Content-Length + Accept-Ranges for media seeking. */
-export function streamLocalFile(input: {
+async function readFileSlice(
+  absolutePath: string,
+  start: number,
+  end: number,
+): Promise<Uint8Array> {
+  const length = end - start + 1;
+  const handle = await open(absolutePath, "r");
+  try {
+    const buffer = Buffer.alloc(length);
+    const { bytesRead } = await handle.read(buffer, 0, length, start);
+    return bytesRead === length ? buffer : buffer.subarray(0, bytesRead);
+  } finally {
+    await handle.close();
+  }
+}
+
+/**
+ * Serve a local file with Content-Length + Accept-Ranges so media players can
+ * seek and track position. Uses buffered bodies (not Node streams) because
+ * Next.js drops Content-Length on streamed responses and falls back to chunked
+ * transfer, which breaks HTML5 audio progress/seek.
+ */
+export async function streamLocalFile(input: {
   absolutePath: string;
   size: number;
   contentType: string;
   contentDisposition: string;
   cacheControl: string;
   rangeHeader?: string | null;
-}): NextResponse {
+}): Promise<NextResponse> {
   const common = {
     "Content-Type": input.contentType,
     "Content-Disposition": input.contentDisposition,
@@ -64,27 +84,24 @@ export function streamLocalFile(input: {
   }
 
   if (!parsed) {
-    const nodeStream = createReadStream(input.absolutePath);
-    const webStream = Readable.toWeb(nodeStream) as ReadableStream;
-    return new NextResponse(webStream, {
+    const body = await readFile(input.absolutePath);
+    return new NextResponse(body, {
       status: 200,
       headers: {
         ...common,
-        "Content-Length": String(input.size),
+        "Content-Length": String(body.byteLength),
       },
     });
   }
 
   const { start, end } = parsed;
-  const chunkSize = end - start + 1;
-  const nodeStream = createReadStream(input.absolutePath, { start, end });
-  const webStream = Readable.toWeb(nodeStream) as ReadableStream;
+  const body = await readFileSlice(input.absolutePath, start, end);
 
-  return new NextResponse(webStream, {
+  return new NextResponse(body, {
     status: 206,
     headers: {
       ...common,
-      "Content-Length": String(chunkSize),
+      "Content-Length": String(body.byteLength),
       "Content-Range": `bytes ${start}-${end}/${input.size}`,
     },
   });

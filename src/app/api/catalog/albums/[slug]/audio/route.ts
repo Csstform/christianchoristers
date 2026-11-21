@@ -37,7 +37,7 @@ export async function GET(
 
   const filename = safe.split("/").pop() || "album.mp3";
 
-  return streamLocalFile({
+  return await streamLocalFile({
     absolutePath: absolute,
     size,
     contentType: contentTypeForAlbumAudio(safe),
