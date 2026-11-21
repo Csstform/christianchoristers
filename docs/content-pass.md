@@ -48,7 +48,7 @@ Parity: North Phoenix 2019, Union City 2011, Norton 50th Reunion 2009 — titles
 |-------|--------|
 | Favicon (ChoristersFavicon 32/180/192) | Added under `public/` + `src/app/icon.png` / `apple-icon.png` |
 | Choir cover photo (2025 home image) | Added as full-bleed `/hero-choir.jpg` on rebuild home |
-| Header logo (`Artboard-1@2x`) | Live header logo only — optional later brand-mark swap |
+| Header logo (`Artboard-1@2x`) | Restored as `/brand-logo.png` in the public header (transparent ink + white over hero) |
 | Footer tagline | Rebuild has short tagline; live also cites streaming platforms on home |
 
 ## Member features (live → rebuild)

@@ -60,11 +60,21 @@ a {
   inset: 0 0 auto;
   z-index: 10;
   padding: 1.25rem 1.5rem;
+  /* Dense top scrim so logo + nav stay readable over light stone in the hero. */
+  background: linear-gradient(
+    180deg,
+    rgba(12, 20, 34, 0.9) 0%,
+    rgba(12, 20, 34, 0.62) 32%,
+    rgba(12, 20, 34, 0.22) 68%,
+    transparent 100%
+  );
+  padding-bottom: 2.75rem;
 }
 
 .site-header--solid {
   position: sticky;
   top: 0;
+  padding-bottom: 1.25rem;
   background: rgba(243, 246, 250, 0.92);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--line);
@@ -80,22 +90,60 @@ a {
 }
 
 .brand-mark {
-  font-family: var(--font-display), Georgia, serif;
-  font-size: clamp(1.35rem, 2.4vw, 1.85rem);
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  line-height: 1.1;
+  display: inline-flex;
+  align-items: center;
+  line-height: 0;
+  flex-shrink: 0;
+}
+
+.brand-logo {
+  width: clamp(7.75rem, 20vw, 10rem);
+  height: auto;
+}
+
+/* Old Artboard mark is dark ink; flip to white over the home hero. */
+.site-header:not(.site-header--solid) .brand-logo {
+  filter: brightness(0) invert(1)
+    drop-shadow(0 1px 10px rgba(12, 20, 34, 0.35));
 }
 
 .site-nav {
   display: flex;
-  gap: 1.25rem;
-  font-size: 0.95rem;
-  color: var(--ink-soft);
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 1.1rem;
+  padding: 0.55rem 0.9rem;
+  border-radius: 0.55rem;
+  font-size: 0.98rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: #ffffff;
+  background: rgba(12, 20, 34, 0.72);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 8px 24px rgba(12, 20, 34, 0.18);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
 }
 
 .site-nav a:hover {
+  color: #ffffff;
+  opacity: 0.88;
+}
+
+.site-header--solid .site-nav {
+  color: var(--ink-soft);
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: none;
+  text-shadow: none;
+  padding: 0;
+}
+
+.site-header--solid .site-nav a:hover {
   color: var(--ink);
+  opacity: 1;
 }
 
 .hero {
