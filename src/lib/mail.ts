@@ -14,12 +14,17 @@ export function getMailer() {
   const secure = process.env.SMTP_SECURE === "true";
   const user = process.env.SMTP_USER;
   const pass = process.env.SMTP_PASS;
+  // Local Postfix / self-signed relays: set SMTP_IGNORE_TLS=true
+  const ignoreTLS = process.env.SMTP_IGNORE_TLS === "true";
 
   return nodemailer.createTransport({
     host,
     port,
     secure,
+    ignoreTLS,
+    requireTLS: process.env.SMTP_REQUIRE_TLS === "true",
     auth: user ? { user, pass } : undefined,
+    tls: ignoreTLS ? { rejectUnauthorized: false } : undefined,
   });
 }
 
