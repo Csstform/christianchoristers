@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { WaveformPlayer } from "@/components/audio/waveform-player";
 import { PublicShell } from "@/components/public-shell";
-import { albumSetUrl, albums } from "@/data/public-catalog";
-import { localAlbumAudioAvailable } from "@/lib/catalog-audio";
+import { albumSetUrl } from "@/data/public-catalog";
+import { listPublishedAlbums, localAlbumAudioAvailable } from "@/lib/catalog";
 import { spotifyEmbedUrl } from "@/lib/spotify";
 
 export const metadata: Metadata = {
@@ -14,6 +14,7 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 export default async function MusicPage() {
+  const albums = await listPublishedAlbums();
   const availability = await Promise.all(
     albums.map(async (album) => ({
       slug: album.slug,

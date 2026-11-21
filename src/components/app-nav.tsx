@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { logoutAction } from "@/lib/actions";
 import type { SessionUser } from "@/lib/auth";
-import { canManageUsers } from "@/lib/roles";
+import { canManageUsers, canUpload } from "@/lib/roles";
 
 const links = [
   { href: "/app", label: "Home" },
@@ -52,6 +52,14 @@ export function AppNav({
             {link.label}
           </Link>
         ))}
+        {canUpload(user.role) ? (
+          <Link
+            href="/app/admin/music"
+            aria-current={current === "/app/admin/music" ? "page" : undefined}
+          >
+            Public music
+          </Link>
+        ) : null}
         {canManageUsers(user.role) ? (
           <Link
             href="/app/admin"

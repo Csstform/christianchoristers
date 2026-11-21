@@ -1067,6 +1067,22 @@ a {
   color: var(--ink-soft);
 }
 
+.catalog-album-card {
+  display: grid;
+  gap: 1rem;
+}
+
+.catalog-album-card__check {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-top: 1.55rem;
+}
+
+.catalog-album-card__check input {
+  width: auto;
+}
+
 .member-pill--admin {
   border-color: color-mix(in srgb, var(--accent) 45%, var(--line));
   color: var(--ink);

@@ -61,6 +61,7 @@ Member → Manager → Director → Admin (see product handoff for capability ma
 
 - No public signup; admins invite users.
 - Member music library supports active/archive repertoire, search, PDF + rehearsal audio uploads (managers+), and repertoire status changes (directors+).
+- Public `/music` catalog (Spotify embeds, CD links, optional local audio) is managed by managers+ at `/app/admin/music`.
 - File vault supports shared upload/download with type validation; managers+ upload/delete, all members download.
 - Program calendar supports manager program CRUD and member RSVPs (coming/practice/programs/housing/notes) visible to all members.
 - Announcements support manager posts with optional email to active members.

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { MemberList } from "@/components/admin/member-list";
 import { AppNav } from "@/components/app-nav";
@@ -21,6 +22,19 @@ export default async function AdminPage() {
   return (
     <>
       <AppNav user={user} current="/app/admin" />
+
+      <section className="app-card" style={{ marginBottom: "1rem" }}>
+        <h2>Public site</h2>
+        <p className="muted">
+          Manage Spotify embeds, purchase links, and local streaming audio for
+          the public catalog.
+        </p>
+        <p>
+          <Link className="btn btn-quiet" href="/app/admin/music">
+            Public music streaming →
+          </Link>
+        </p>
+      </section>
 
       <section className="app-card" style={{ marginBottom: "1rem" }}>
         <h2>Members</h2>
