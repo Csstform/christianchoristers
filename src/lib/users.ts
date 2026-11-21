@@ -8,6 +8,7 @@ import {
   type UserRole,
 } from "@/db/schema";
 import { generateToken, hashToken } from "@/lib/crypto";
+import { invalidateOutstandingInvites } from "@/lib/invites";
 import { appBaseUrl, sendInviteEmail } from "@/lib/mail";
 
 const INVITE_DAYS = 14;
@@ -139,6 +140,7 @@ export async function updateUserStatus(input: {
 
   if (input.status === "disabled") {
     await db.delete(sessions).where(eq(sessions.userId, input.userId));
+    await invalidateOutstandingInvites(input.userId);
   }
 
   return updated;
@@ -175,6 +177,7 @@ export async function resendInvite(input: {
     .where(eq(users.id, target.id));
 
   await db.delete(sessions).where(eq(sessions.userId, target.id));
+  await invalidateOutstandingInvites(target.id);
 
   await db.insert(invites).values({
     userId: target.id,

@@ -1,10 +1,20 @@
-import { eq } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import { db } from "@/db";
 import { invites, users, type User, type UserRole } from "@/db/schema";
 import { generateToken, hashToken } from "@/lib/crypto";
 import { appBaseUrl, sendInviteEmail } from "@/lib/mail";
 
 const INVITE_DAYS = 14;
+
+/** Expire every unaccepted invite for a user so old links stop working. */
+export async function invalidateOutstandingInvites(
+  userId: string,
+): Promise<void> {
+  await db
+    .update(invites)
+    .set({ expiresAt: new Date(0) })
+    .where(and(eq(invites.userId, userId), isNull(invites.acceptedAt)));
+}
 
 export async function createInviteRecord(input: {
   email: string;
@@ -45,6 +55,9 @@ export async function createInviteRecord(input: {
 
   const rawToken = generateToken();
   const expiresAt = new Date(Date.now() + INVITE_DAYS * 24 * 60 * 60 * 1000);
+
+  // Re-inviting a disabled account must kill any leftover tokens first.
+  await invalidateOutstandingInvites(user.id);
 
   await db.insert(invites).values({
     userId: user.id,

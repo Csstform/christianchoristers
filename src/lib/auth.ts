@@ -51,6 +51,16 @@ export async function acceptInvite(input: {
     throw new Error("Invite is invalid or expired.");
   }
 
+  const existing = await db.query.users.findFirst({
+    where: eq(users.id, invite.userId),
+  });
+  if (!existing || existing.status === "disabled") {
+    throw new Error("Invite is invalid or expired.");
+  }
+  if (existing.status !== "invited") {
+    throw new Error("Invite is invalid or expired.");
+  }
+
   const passwordHash = await hashPassword(input.password);
   const [user] = await db
     .update(users)
@@ -59,8 +69,12 @@ export async function acceptInvite(input: {
       status: "active",
       updatedAt: new Date(),
     })
-    .where(eq(users.id, invite.userId))
+    .where(and(eq(users.id, invite.userId), eq(users.status, "invited")))
     .returning();
+
+  if (!user) {
+    throw new Error("Invite is invalid or expired.");
+  }
 
   await db
     .update(invites)
