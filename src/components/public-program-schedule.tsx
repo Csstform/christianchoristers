@@ -10,10 +10,6 @@ export async function PublicProgramSchedule({ limit = 5 }: { limit?: number }) {
   return (
     <section className="section home-schedule" aria-labelledby="program-schedule-heading">
       <h2 id="program-schedule-heading">Program schedule</h2>
-      <p>
-        Upcoming concerts and weekend programs. Members manage dates in the
-        calendar; new entries appear here automatically.
-      </p>
 
       {upcoming.length === 0 ? (
         <p className="muted home-schedule__empty">
