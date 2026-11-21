@@ -210,6 +210,10 @@ a {
   max-width: 40rem;
 }
 
+.home-schedule {
+  scroll-margin-top: 1.5rem;
+}
+
 .home-schedule__empty {
   margin-top: 1.5rem;
 }
