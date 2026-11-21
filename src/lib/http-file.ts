@@ -85,7 +85,7 @@ export async function streamLocalFile(input: {
 
   if (!parsed) {
     const body = await readFile(input.absolutePath);
-    return new NextResponse(body, {
+    return new NextResponse(new Uint8Array(body), {
       status: 200,
       headers: {
         ...common,
@@ -97,7 +97,7 @@ export async function streamLocalFile(input: {
   const { start, end } = parsed;
   const body = await readFileSlice(input.absolutePath, start, end);
 
-  return new NextResponse(body, {
+  return new NextResponse(new Uint8Array(body), {
     status: 206,
     headers: {
       ...common,
