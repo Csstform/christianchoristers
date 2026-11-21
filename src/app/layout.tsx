@@ -20,7 +20,14 @@ export const metadata: Metadata = {
     template: "%s · Christian Choristers",
   },
   description:
-    "Organized in 1959, the Christian Choristers present the Good News in song to Apostolic Christian Churches and their local ministries across North America.",
+    "Organized in 1959, the Christian Choristers present the Good News in song to the Apostolic Christian Churches and their local ministries across North America.",
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/icon.png", type: "image/png", sizes: "192x192" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
+  },
 };
 
 export default function RootLayout({
