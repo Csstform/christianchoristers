@@ -144,7 +144,7 @@ export const announcements = pgTable("announcements", {
     .defaultNow(),
 });
 
-export const concerts = pgTable("concerts", {
+export const programs = pgTable("programs", {
   id: uuid("id").defaultRandom().primaryKey(),
   title: varchar("title", { length: 255 }).notNull(),
   location: varchar("location", { length: 255 }),
@@ -164,9 +164,9 @@ export const rsvps = pgTable(
   "rsvps",
   {
     id: uuid("id").defaultRandom().primaryKey(),
-    concertId: uuid("concert_id")
+    programId: uuid("program_id")
       .notNull()
-      .references(() => concerts.id, { onDelete: "cascade" }),
+      .references(() => programs.id, { onDelete: "cascade" }),
     userId: uuid("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
@@ -186,7 +186,7 @@ export const rsvps = pgTable(
       .defaultNow(),
   },
   (table) => [
-    uniqueIndex("rsvps_concert_user_idx").on(table.concertId, table.userId),
+    uniqueIndex("rsvps_program_user_idx").on(table.programId, table.userId),
   ],
 );
 

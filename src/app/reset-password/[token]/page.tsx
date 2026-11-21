@@ -8,7 +8,7 @@ import { resetPasswordAction, type ActionResult } from "@/lib/actions";
 
 export default function ResetPasswordPage() {
   const params = useParams<{ token: string }>();
-  const token = params.token;
+  const token = params?.token ?? "";
   const boundAction = resetPasswordAction.bind(null, token);
   const [state, formAction, pending] = useActionState<
     ActionResult | null,

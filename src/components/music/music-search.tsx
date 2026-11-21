@@ -11,7 +11,7 @@ export function MusicSearch({
   query: string;
 }) {
   const router = useRouter();
-  const pathname = usePathname();
+  const pathname = usePathname() ?? "/app/music";
   const [pending, startTransition] = useTransition();
 
   return (

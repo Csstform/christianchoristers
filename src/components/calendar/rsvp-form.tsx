@@ -4,8 +4,8 @@ import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useState } from "react";
 import {
   saveRsvpAction,
-  type ConcertActionResult,
-} from "@/lib/concert-actions";
+  type ProgramActionResult,
+} from "@/lib/program-actions";
 
 type YesNo = "yes" | "no";
 
@@ -41,16 +41,16 @@ function YesNoSelect({
 }
 
 export function RsvpForm({
-  concertId,
+  programId,
   defaults,
 }: {
-  concertId: string;
+  programId: string;
   defaults: Defaults;
 }) {
   const router = useRouter();
-  const action = saveRsvpAction.bind(null, concertId);
+  const action = saveRsvpAction.bind(null, programId);
   const [state, formAction, pending] = useActionState<
-    ConcertActionResult | null,
+    ProgramActionResult | null,
     FormData
   >(action, null);
   const [needHousing, setNeedHousing] = useState<YesNo>(defaults.needHousing);

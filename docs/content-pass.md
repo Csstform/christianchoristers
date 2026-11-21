@@ -24,7 +24,7 @@ No separate About, Contact, or Schedule pages appear in the live main menu.
 - Song vignette paragraph (In the Lord Alone / I’m Feeling Fine / Sweet Beulah Land)
 - Streaming callout (iTunes, YouTube Music, Spotify) with artist links
 
-**Live “Program Schedule”:** heading only in WordPress HTML. Rebuild now surfaces upcoming `/app/calendar` concerts on the public home page as schedule cards (title, when, location).
+**Live “Program Schedule”:** heading only in WordPress HTML. Rebuild now surfaces upcoming `/app/calendar` programs on the public home page as schedule cards (title, when, location).
 
 ## Music
 
@@ -57,7 +57,7 @@ Already covered by the member app: music archive, vault/files, calendar/RSVP, an
 
 ## Recommended next content work
 
-1. Publish real **program/concert** dates (public page or surface upcoming from `/app/calendar`).
+1. Publish real **program** dates (public page or surface upcoming from `/app/calendar`).
 2. Add **album artwork** on `/music`.
 3. **Password reset** for members.
 4. When cutting over the apex domain, keep this favicon set and re-check streaming links.

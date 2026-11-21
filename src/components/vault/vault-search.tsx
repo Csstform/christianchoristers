@@ -5,7 +5,7 @@ import { useTransition } from "react";
 
 export function VaultSearch({ query }: { query: string }) {
   const router = useRouter();
-  const pathname = usePathname();
+  const pathname = usePathname() ?? "/app/files";
   const [pending, startTransition] = useTransition();
 
   return (

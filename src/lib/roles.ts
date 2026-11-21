@@ -15,7 +15,7 @@ export function canUpload(role: UserRole): boolean {
   return hasMinRole(role, "manager");
 }
 
-export function canManageConcerts(role: UserRole): boolean {
+export function canManagePrograms(role: UserRole): boolean {
   return hasMinRole(role, "manager");
 }
 

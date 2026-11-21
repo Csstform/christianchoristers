@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import { WaveformPlayer } from "@/components/audio/waveform-player";
 import { PublicShell } from "@/components/public-shell";
 import { albumSetUrl, albums } from "@/data/public-catalog";
 import { localAlbumAudioAvailable } from "@/lib/catalog-audio";
@@ -8,6 +9,9 @@ import { spotifyEmbedUrl } from "@/lib/spotify";
 export const metadata: Metadata = {
   title: "Music",
 };
+
+/** Re-check on-disk album audio each request (uploads are not part of the build). */
+export const dynamic = "force-dynamic";
 
 export default async function MusicPage() {
   const availability = await Promise.all(
@@ -71,13 +75,10 @@ export default async function MusicPage() {
                   ) : null}
                   {!embedSrc && hasLocal ? (
                     <div className="album-local-player">
-                      <audio
-                        controls
-                        preload="none"
+                      <WaveformPlayer
                         src={`/api/catalog/albums/${album.slug}/audio`}
-                      >
-                        Your browser does not support audio playback.
-                      </audio>
+                        label={`${album.title} audio`}
+                      />
                       <p className="muted">Streaming from this server</p>
                     </div>
                   ) : null}

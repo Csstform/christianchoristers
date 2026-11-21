@@ -1,11 +1,11 @@
 import {
-  formatConcertDateParts,
-  formatConcertWhen,
-  listUpcomingConcerts,
-} from "@/lib/concerts";
+  formatProgramDateParts,
+  formatProgramWhen,
+  listUpcomingPrograms,
+} from "@/lib/programs";
 
 export async function PublicProgramSchedule({ limit = 5 }: { limit?: number }) {
-  const upcoming = (await listUpcomingConcerts()).slice(0, limit);
+  const upcoming = (await listUpcomingPrograms()).slice(0, limit);
 
   return (
     <section
@@ -21,24 +21,24 @@ export async function PublicProgramSchedule({ limit = 5 }: { limit?: number }) {
         </p>
       ) : (
         <ul className="home-schedule__list">
-          {upcoming.map((concert) => {
-            const date = formatConcertDateParts(concert.startsAt);
+          {upcoming.map((program) => {
+            const date = formatProgramDateParts(program.startsAt);
             return (
-              <li key={concert.id} className="home-schedule__item">
+              <li key={program.id} className="home-schedule__item">
                 <time
                   className="home-schedule__date"
-                  dateTime={concert.startsAt.toISOString()}
-                  aria-label={formatConcertWhen(concert.startsAt, concert.endsAt)}
+                  dateTime={program.startsAt.toISOString()}
+                  aria-label={formatProgramWhen(program.startsAt, program.endsAt)}
                 >
                   <span className="home-schedule__month">{date.month}</span>
                   <span className="home-schedule__day">{date.day}</span>
                   <span className="home-schedule__weekday">{date.weekday}</span>
                 </time>
                 <div className="home-schedule__body">
-                  <h3>{concert.title}</h3>
+                  <h3>{program.title}</h3>
                   <p className="muted">
-                    {formatConcertWhen(concert.startsAt, concert.endsAt)}
-                    {concert.location ? ` · ${concert.location}` : ""}
+                    {formatProgramWhen(program.startsAt, program.endsAt)}
+                    {program.location ? ` · ${program.location}` : ""}
                   </p>
                 </div>
               </li>

@@ -4,33 +4,33 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import {
-  createConcert,
-  deleteConcert,
+  createProgram,
+  deleteProgram,
   fromDatetimeLocalValue,
-  getConcert,
+  getProgram,
   rsvpInputFromForm,
-  updateConcert,
+  updateProgram,
   upsertRsvp,
-} from "@/lib/concerts";
-import { canManageConcerts } from "@/lib/roles";
+} from "@/lib/programs";
+import { canManagePrograms } from "@/lib/roles";
 
-export type ConcertActionResult =
+export type ProgramActionResult =
   | { ok: true; message?: string }
   | { ok: false; error: string };
 
 async function requireManager() {
   const user = await getCurrentUser();
   if (!user) throw new Error("Unauthorized");
-  if (!canManageConcerts(user.role)) {
-    throw new Error("Managers and above can manage concerts.");
+  if (!canManagePrograms(user.role)) {
+    throw new Error("Managers and above can manage programs.");
   }
   return user;
 }
 
-export async function createConcertAction(
-  _prev: ConcertActionResult | null,
+export async function createProgramAction(
+  _prev: ProgramActionResult | null,
   formData: FormData,
-): Promise<ConcertActionResult> {
+): Promise<ProgramActionResult> {
   try {
     const user = await requireManager();
     const title = String(formData.get("title") ?? "");
@@ -45,7 +45,7 @@ export async function createConcertAction(
       throw new Error("End date/time is invalid.");
     }
 
-    const concert = await createConcert({
+    const program = await createProgram({
       title,
       location,
       details,
@@ -54,7 +54,7 @@ export async function createConcertAction(
       createdById: user.id,
     });
     revalidatePath("/app/calendar");
-    redirect(`/app/calendar/${concert.id}`);
+    redirect(`/app/calendar/${program.id}`);
   } catch (error) {
     if (
       error &&
@@ -66,16 +66,16 @@ export async function createConcertAction(
     }
     return {
       ok: false,
-      error: error instanceof Error ? error.message : "Could not create concert.",
+      error: error instanceof Error ? error.message : "Could not create program.",
     };
   }
 }
 
-export async function updateConcertAction(
-  concertId: string,
-  _prev: ConcertActionResult | null,
+export async function updateProgramAction(
+  programId: string,
+  _prev: ProgramActionResult | null,
   formData: FormData,
-): Promise<ConcertActionResult> {
+): Promise<ProgramActionResult> {
   try {
     await requireManager();
     const title = String(formData.get("title") ?? "");
@@ -90,7 +90,7 @@ export async function updateConcertAction(
       throw new Error("End date/time is invalid.");
     }
 
-    await updateConcert(concertId, {
+    await updateProgram(programId, {
       title,
       location,
       details,
@@ -98,23 +98,23 @@ export async function updateConcertAction(
       endsAt,
     });
     revalidatePath("/app/calendar");
-    revalidatePath(`/app/calendar/${concertId}`);
-    return { ok: true, message: "Concert updated." };
+    revalidatePath(`/app/calendar/${programId}`);
+    return { ok: true, message: "Program updated." };
   } catch (error) {
     return {
       ok: false,
-      error: error instanceof Error ? error.message : "Could not update concert.",
+      error: error instanceof Error ? error.message : "Could not update program.",
     };
   }
 }
 
-export async function deleteConcertAction(
-  concertId: string,
-): Promise<ConcertActionResult> {
+export async function deleteProgramAction(
+  programId: string,
+): Promise<ProgramActionResult> {
   try {
     await requireManager();
-    const deleted = await deleteConcert(concertId);
-    if (!deleted) throw new Error("Concert not found.");
+    const deleted = await deleteProgram(programId);
+    if (!deleted) throw new Error("Program not found.");
     revalidatePath("/app/calendar");
     redirect("/app/calendar");
   } catch (error) {
@@ -128,29 +128,29 @@ export async function deleteConcertAction(
     }
     return {
       ok: false,
-      error: error instanceof Error ? error.message : "Could not delete concert.",
+      error: error instanceof Error ? error.message : "Could not delete program.",
     };
   }
 }
 
 export async function saveRsvpAction(
-  concertId: string,
-  _prev: ConcertActionResult | null,
+  programId: string,
+  _prev: ProgramActionResult | null,
   formData: FormData,
-): Promise<ConcertActionResult> {
+): Promise<ProgramActionResult> {
   try {
     const user = await getCurrentUser();
     if (!user) throw new Error("Unauthorized");
-    const concert = await getConcert(concertId);
-    if (!concert) throw new Error("Concert not found.");
+    const program = await getProgram(programId);
+    if (!program) throw new Error("Program not found.");
 
     const payload = rsvpInputFromForm(formData);
     await upsertRsvp({
-      concertId,
+      programId,
       userId: user.id,
       ...payload,
     });
-    revalidatePath(`/app/calendar/${concertId}`);
+    revalidatePath(`/app/calendar/${programId}`);
     revalidatePath("/app/calendar");
     return { ok: true, message: "RSVP saved. Visible to all members." };
   } catch (error) {

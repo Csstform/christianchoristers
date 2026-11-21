@@ -2,16 +2,16 @@
 
 import { useActionState, useTransition } from "react";
 import {
-  deleteConcertAction,
-  updateConcertAction,
-  type ConcertActionResult,
-} from "@/lib/concert-actions";
+  deleteProgramAction,
+  updateProgramAction,
+  type ProgramActionResult,
+} from "@/lib/program-actions";
 
-export function ConcertEditForm({
-  concertId,
+export function ProgramEditForm({
+  programId,
   defaults,
 }: {
-  concertId: string;
+  programId: string;
   defaults: {
     title: string;
     location: string;
@@ -20,9 +20,9 @@ export function ConcertEditForm({
     details: string;
   };
 }) {
-  const action = updateConcertAction.bind(null, concertId);
+  const action = updateProgramAction.bind(null, programId);
   const [state, formAction, pending] = useActionState<
-    ConcertActionResult | null,
+    ProgramActionResult | null,
     FormData
   >(action, null);
   const [deleting, startDelete] = useTransition();
@@ -64,7 +64,7 @@ export function ConcertEditForm({
         {state?.ok ? <p className="form-ok">{state.message}</p> : null}
         {state && !state.ok ? <p className="form-error">{state.error}</p> : null}
         <button className="btn btn-dark" type="submit" disabled={pending}>
-          {pending ? "Saving…" : "Save concert"}
+          {pending ? "Saving…" : "Save program"}
         </button>
       </form>
       <div className="music-actions">
@@ -73,13 +73,13 @@ export function ConcertEditForm({
           className="btn btn-danger"
           disabled={deleting}
           onClick={() => {
-            if (!confirm("Delete this concert and all RSVPs?")) return;
+            if (!confirm("Delete this program and all RSVPs?")) return;
             startDelete(async () => {
-              await deleteConcertAction(concertId);
+              await deleteProgramAction(programId);
             });
           }}
         >
-          {deleting ? "Deleting…" : "Delete concert"}
+          {deleting ? "Deleting…" : "Delete program"}
         </button>
       </div>
     </div>
