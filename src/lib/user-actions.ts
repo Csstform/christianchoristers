@@ -92,14 +92,20 @@ export async function resendMemberInviteAction(
     if (!userId) {
       return { ok: false, error: "Missing member." };
     }
-    const { inviteUrl, email } = await resendInvite({
+    const { inviteUrl, email, emailSent } = await resendInvite({
       userId,
       actorId: current.id,
     });
     revalidatePath("/app/admin");
+    if (emailSent) {
+      return {
+        ok: true,
+        message: `Invite resent to ${email}.`,
+      };
+    }
     return {
       ok: true,
-      message: `Invite resent to ${email}. Set-password link: ${inviteUrl}`,
+      message: `Invite created for ${email}, but email was not sent. Set-password link: ${inviteUrl}`,
     };
   } catch (error) {
     return {

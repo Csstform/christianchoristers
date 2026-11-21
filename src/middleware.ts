@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { safeAppPath } from "@/lib/paths";
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -10,7 +11,12 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(login);
   }
 
-  if ((pathname === "/login" || pathname.startsWith("/invite/")) && session) {
+  if (pathname === "/login" && session) {
+    const next = safeAppPath(request.nextUrl.searchParams.get("next"));
+    return NextResponse.redirect(new URL(next, request.url));
+  }
+
+  if (pathname.startsWith("/invite/") && session) {
     return NextResponse.redirect(new URL("/app", request.url));
   }
 

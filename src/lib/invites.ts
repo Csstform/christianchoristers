@@ -21,7 +21,12 @@ export async function createInviteRecord(input: {
   name: string;
   role?: UserRole;
   sendEmail?: boolean;
-}): Promise<{ user: User; inviteUrl: string; rawToken: string }> {
+}): Promise<{
+  user: User;
+  inviteUrl: string;
+  rawToken: string;
+  emailSent: boolean;
+}> {
   const email = input.email.trim().toLowerCase();
   const existing = await db.query.users.findFirst({
     where: eq(users.email, email),
@@ -66,13 +71,15 @@ export async function createInviteRecord(input: {
   });
 
   const inviteUrl = `${appBaseUrl()}/invite/${rawToken}`;
+  let emailSent = false;
   if (input.sendEmail !== false) {
     try {
       await sendInviteEmail({ to: user.email, name: user.name, inviteUrl });
+      emailSent = true;
     } catch (error) {
       console.error("[invite] email send failed; invite still created", error);
     }
   }
 
-  return { user, inviteUrl, rawToken };
+  return { user, inviteUrl, rawToken, emailSent };
 }
