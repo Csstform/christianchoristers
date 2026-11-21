@@ -1,10 +1,10 @@
 import { stat } from "fs/promises";
 import type { NextApiRequest, NextApiResponse } from "next";
 import {
-  albumBySlug,
   contentTypeForAlbumAudio,
+  getAlbumBySlug,
   safeAlbumAudioPath,
-} from "@/lib/catalog-audio";
+} from "@/lib/catalog";
 import { sendLocalFile } from "@/lib/http-file";
 import { absoluteUploadPath } from "@/lib/storage";
 
@@ -25,8 +25,8 @@ export default async function handler(
   }
 
   const slug = String(req.query.slug ?? "");
-  const album = albumBySlug(slug);
-  if (!album?.localAudioPath) {
+  const album = await getAlbumBySlug(slug);
+  if (!album?.published || !album.localAudioPath) {
     res.status(404).json({ error: "Not found" });
     return;
   }
