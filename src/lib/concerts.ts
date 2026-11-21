@@ -244,6 +244,27 @@ export function formatConcertWhen(startsAt: Date, endsAt?: Date | null): string 
   })}`;
 }
 
+/** Compact calendar chip parts for public schedule cards (America/Detroit). */
+export function formatConcertDateParts(startsAt: Date): {
+  month: string;
+  day: string;
+  weekday: string;
+} {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/Detroit",
+    month: "short",
+    day: "numeric",
+    weekday: "short",
+  }).formatToParts(startsAt);
+  const get = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find((part) => part.type === type)?.value ?? "";
+  return {
+    month: get("month").toUpperCase(),
+    day: get("day"),
+    weekday: get("weekday"),
+  };
+}
+
 export function toDatetimeLocalValue(date: Date): string {
   // Render in America/Detroit for form inputs
   const parts = new Intl.DateTimeFormat("en-US", {

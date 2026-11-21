@@ -24,7 +24,7 @@ No separate About, Contact, or Schedule pages appear in the live main menu.
 - Song vignette paragraph (In the Lord Alone / I’m Feeling Fine / Sweet Beulah Land)
 - Streaming callout (iTunes, YouTube Music, Spotify) with artist links
 
-**Live “Program Schedule”:** heading only — no dates/venues in the current HTML. Nothing to migrate until someone publishes events (then prefer `/app/calendar` or a public schedule page).
+**Live “Program Schedule”:** heading only in WordPress HTML. Rebuild now surfaces upcoming `/app/calendar` concerts on the public home page as schedule cards (title, when, location).
 
 ## Music
 

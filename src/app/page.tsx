@@ -1,7 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
+import { PublicProgramSchedule } from "@/components/public-program-schedule";
 import { PublicShell } from "@/components/public-shell";
 import { streamingLinks } from "@/data/streaming-links";
+
+export const dynamic = "force-dynamic";
 
 export default function HomePage() {
   return (
@@ -44,6 +47,8 @@ export default function HomePage() {
           of their songs.
         </p>
       </section>
+
+      <PublicProgramSchedule />
 
       <section className="section home-streaming">
         <h2>Listen online</h2>
