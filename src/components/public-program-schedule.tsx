@@ -1,11 +1,11 @@
 import {
   formatProgramDateParts,
   formatProgramWhen,
-  listUpcomingPrograms,
+  listPublicUpcomingPrograms,
 } from "@/lib/programs";
 
 export async function PublicProgramSchedule({ limit = 5 }: { limit?: number }) {
-  const upcoming = (await listUpcomingPrograms()).slice(0, limit);
+  const upcoming = (await listPublicUpcomingPrograms()).slice(0, limit);
 
   return (
     <section

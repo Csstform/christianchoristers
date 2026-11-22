@@ -29,12 +29,17 @@ The seed script prints an admin invite URL (set `SEED_ADMIN_EMAIL` in `.env`).
 
 ```bash
 cp .env.example .env   # fill SMTP_*, AUTH_SECRET, strong DB password, APP_BASE_URL
+# Optional bot protection: TURNSTILE_SITE_KEY + TURNSTILE_SECRET_KEY
 # Set NODE_ENV=production so session cookies get the Secure flag
 docker compose up -d --build
-docker compose exec app npx drizzle-kit migrate   # or db:push on first bring-up
+# Migrations run automatically on container start (scripts/run-migrate.mjs)
 ```
 
 Point Cloudflare DNS at the droplet when ready to cut over from MediaServe/WordPress.
+
+### Cloudflare Turnstile (login + password reset)
+
+Create a Turnstile widget in the Cloudflare dashboard, then set both keys in `.env` (and restart the app). When unset, login works without a captcha.
 
 ### Backups
 
@@ -51,7 +56,7 @@ echo '15 6 * * * root APP_DIR=/opt/christianchoristers /opt/christianchoristers/
 
 Public: `/`, `/music`, `/live-recordings`, `/login`, `/invite/[token]`
 
-Member: `/app`, `/app/music`, `/app/calendar`, `/app/files`, `/app/suggestions`, `/app/admin`
+Member: `/app`, `/app/music`, `/app/calendar`, `/app/files`, `/app/suggestions`, `/app/admin`, `/app/admin/music`, `/app/admin/live-recordings`, `/app/admin/settings`
 
 ## Roles
 

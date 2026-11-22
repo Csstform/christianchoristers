@@ -38,6 +38,8 @@ services:
       SMTP_IGNORE_TLS: ${SMTP_IGNORE_TLS:-false}
       SMTP_REQUIRE_TLS: ${SMTP_REQUIRE_TLS:-false}
       AUTH_SECRET: ${AUTH_SECRET:-dev-change-me}
+      TURNSTILE_SITE_KEY: ${TURNSTILE_SITE_KEY:-}
+      TURNSTILE_SECRET_KEY: ${TURNSTILE_SECRET_KEY:-}
     volumes:
       - uploads:/data/uploads
     ports:

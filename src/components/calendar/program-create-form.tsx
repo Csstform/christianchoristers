@@ -36,8 +36,13 @@ export function ProgramCreateForm() {
         Details
         <textarea name="details" rows={3} placeholder="Schedule notes, hosts, etc." />
       </label>
+      <label className="catalog-album-card__check">
+        <input type="checkbox" name="isPublic" />
+        Show on public home schedule
+      </label>
       <p className="muted">
-        Upcoming programs also appear on the public home page schedule.
+        Leave unchecked for internal weekends. Only checked programs appear on
+        the public home page.
       </p>
       {state && !state.ok ? <p className="form-error">{state.error}</p> : null}
       <button className="btn btn-dark" type="submit" disabled={pending}>

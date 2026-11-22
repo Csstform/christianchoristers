@@ -657,6 +657,16 @@ a {
   margin: 0 0 0.5rem;
 }
 
+.turnstile-field {
+  display: grid;
+  gap: 0.4rem;
+  justify-items: start;
+}
+
+.turnstile-field .form-error {
+  margin: 0;
+}
+
 .form {
   display: grid;
   gap: 0.9rem;

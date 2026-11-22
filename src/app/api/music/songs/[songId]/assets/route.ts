@@ -7,7 +7,7 @@ import {
 } from "@/lib/file-validation";
 import { addSongAsset, getSong, type SongAssetKind } from "@/lib/music";
 import { canUpload } from "@/lib/roles";
-import { saveUpload } from "@/lib/storage";
+import { readFileHeader, saveUploadStream } from "@/lib/storage";
 
 export const runtime = "nodejs";
 
@@ -59,17 +59,18 @@ export async function POST(
   }
 
   try {
-    const buffer = Buffer.from(await file.arrayBuffer());
+    const header = await readFileHeader(file);
     const { mimeType, safeFilename } = validateAndCanonicalizeUpload({
       kind,
       filename: file.name,
-      buffer,
+      buffer: header,
+      sizeBytes: file.size,
     });
 
-    const saved = await saveUpload({
+    const saved = await saveUploadStream({
       category: "songs",
       originalName: safeFilename,
-      data: buffer,
+      stream: file.stream(),
       mimeType,
     });
 

@@ -2,11 +2,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { PublicProgramSchedule } from "@/components/public-program-schedule";
 import { PublicShell } from "@/components/public-shell";
-import { streamingLinks } from "@/data/streaming-links";
+import { getStreamingLinks } from "@/lib/site-settings";
 
 export const dynamic = "force-dynamic";
 
-export default function HomePage() {
+export default async function HomePage() {
+  const streamingLinks = await getStreamingLinks();
+
   return (
     <PublicShell>
       <section className="hero">

@@ -16,6 +16,17 @@ export async function listUpcomingPrograms() {
     .orderBy(asc(programs.startsAt));
 }
 
+/** Upcoming programs opted into the public home schedule. */
+export async function listPublicUpcomingPrograms() {
+  return db
+    .select()
+    .from(programs)
+    .where(
+      and(gte(programs.startsAt, new Date()), eq(programs.isPublic, true)),
+    )
+    .orderBy(asc(programs.startsAt));
+}
+
 export async function listPastPrograms() {
   return db
     .select()
@@ -35,6 +46,7 @@ export async function createProgram(input: {
   startsAt: Date;
   endsAt?: Date | null;
   details?: string;
+  isPublic?: boolean;
   createdById: string;
 }) {
   const title = input.title.trim();
@@ -51,6 +63,7 @@ export async function createProgram(input: {
       startsAt: input.startsAt,
       endsAt: input.endsAt ?? null,
       details: input.details?.trim() || null,
+      isPublic: Boolean(input.isPublic),
       createdById: input.createdById,
     })
     .returning();
@@ -65,6 +78,7 @@ export async function updateProgram(
     startsAt: Date;
     endsAt?: Date | null;
     details?: string;
+    isPublic?: boolean;
   },
 ) {
   const title = input.title.trim();
@@ -81,6 +95,7 @@ export async function updateProgram(
       startsAt: input.startsAt,
       endsAt: input.endsAt ?? null,
       details: input.details?.trim() || null,
+      isPublic: Boolean(input.isPublic),
       updatedAt: new Date(),
     })
     .where(eq(programs.id, id))

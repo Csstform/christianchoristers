@@ -168,12 +168,16 @@ function magicMatches(ext: string, buffer: Buffer): boolean {
 
 export function validateVaultUpload(input: {
   filename: string;
+  /** Full file or a short magic-byte prefix when streaming to disk. */
   buffer: Buffer;
+  /** Prefer file.size when `buffer` is only a header sample. */
+  sizeBytes?: number;
 }): { mimeType: string; safeFilename: string; extension: string } {
-  if (input.buffer.length === 0) {
+  const size = input.sizeBytes ?? input.buffer.length;
+  if (size === 0 || input.buffer.length === 0) {
     throw new Error("Choose a file to upload.");
   }
-  if (input.buffer.length > maxUploadBytes()) {
+  if (size > maxUploadBytes()) {
     throw new Error("File is too large (25MB max).");
   }
 

@@ -45,14 +45,17 @@ export async function createProgramAction(
       throw new Error("End date/time is invalid.");
     }
 
+    const isPublic = String(formData.get("isPublic") ?? "") === "on";
     const program = await createProgram({
       title,
       location,
       details,
       startsAt,
       endsAt,
+      isPublic,
       createdById: user.id,
     });
+    revalidatePath("/");
     revalidatePath("/app/calendar");
     redirect(`/app/calendar/${program.id}`);
   } catch (error) {
@@ -90,13 +93,16 @@ export async function updateProgramAction(
       throw new Error("End date/time is invalid.");
     }
 
+    const isPublic = String(formData.get("isPublic") ?? "") === "on";
     await updateProgram(programId, {
       title,
       location,
       details,
       startsAt,
       endsAt,
+      isPublic,
     });
+    revalidatePath("/");
     revalidatePath("/app/calendar");
     revalidatePath(`/app/calendar/${programId}`);
     return { ok: true, message: "Program updated." };

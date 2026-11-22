@@ -18,6 +18,7 @@ export function ProgramEditForm({
     startsAt: string;
     endsAt: string;
     details: string;
+    isPublic: boolean;
   };
 }) {
   const action = updateProgramAction.bind(null, programId);
@@ -60,6 +61,14 @@ export function ProgramEditForm({
         <label>
           Details
           <textarea name="details" rows={3} defaultValue={defaults.details} />
+        </label>
+        <label className="catalog-album-card__check">
+          <input
+            type="checkbox"
+            name="isPublic"
+            defaultChecked={defaults.isPublic}
+          />
+          Show on public home schedule
         </label>
         {state?.ok ? <p className="form-ok">{state.message}</p> : null}
         {state && !state.ok ? <p className="form-error">{state.error}</p> : null}

@@ -55,11 +55,10 @@ export async function POST(
   }
 
   try {
-    const buffer = Buffer.from(await file.arrayBuffer());
     const updated = await saveAlbumLocalAudio({
       albumId: id,
       filename: file.name,
-      buffer,
+      file,
     });
 
     revalidatePath("/music");

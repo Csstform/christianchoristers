@@ -53,12 +53,28 @@ export function AppNav({
           </Link>
         ))}
         {canUpload(user.role) ? (
-          <Link
-            href="/app/admin/music"
-            aria-current={current === "/app/admin/music" ? "page" : undefined}
-          >
-            Public music
-          </Link>
+          <>
+            <Link
+              href="/app/admin/music"
+              aria-current={current === "/app/admin/music" ? "page" : undefined}
+            >
+              Public music
+            </Link>
+            <Link
+              href="/app/admin/live-recordings"
+              aria-current={
+                current === "/app/admin/live-recordings" ? "page" : undefined
+              }
+            >
+              Live recordings
+            </Link>
+            <Link
+              href="/app/admin/settings"
+              aria-current={current === "/app/admin/settings" ? "page" : undefined}
+            >
+              Site settings
+            </Link>
+          </>
         ) : null}
         {canManageUsers(user.role) ? (
           <Link

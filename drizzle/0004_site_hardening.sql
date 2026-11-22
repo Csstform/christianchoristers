@@ -1,0 +1,6 @@
+ALTER TABLE "programs" ADD COLUMN "is_public" boolean DEFAULT false NOT NULL;--> statement-breakpoint
+CREATE TABLE "site_settings" (
+	"key" varchar(64) PRIMARY KEY NOT NULL,
+	"value" text NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+);

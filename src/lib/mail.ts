@@ -154,11 +154,15 @@ export async function sendAnnouncementEmails(input: {
 
   const subject = `Announcement: ${input.title}`;
   const link = `${appBaseUrl()}/app/announcements`;
+  const concurrency = Math.max(
+    1,
+    Math.min(8, Number(process.env.ANNOUNCEMENT_EMAIL_CONCURRENCY ?? "4") || 4),
+  );
   let sent = 0;
   let failed = 0;
   const errors: string[] = [];
 
-  for (const recipient of input.recipients) {
+  async function sendOne(recipient: { email: string; name: string }) {
     const text = `Hello ${recipient.name},
 
 ${input.authorName} posted a new Christian Choristers announcement:
@@ -179,6 +183,11 @@ ${link}
       errors.push(`${recipient.email}: ${message}`);
       console.error("[mail] announcement send failed", recipient.email, error);
     }
+  }
+
+  for (let i = 0; i < input.recipients.length; i += concurrency) {
+    const batch = input.recipients.slice(i, i + concurrency);
+    await Promise.all(batch.map((recipient) => sendOne(recipient)));
   }
 
   return { sent, failed, skipped: false, errors };

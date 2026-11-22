@@ -34,6 +34,7 @@ function ProgramList({
                   <p className="muted">
                     {formatProgramWhen(program.startsAt, program.endsAt)}
                     {program.location ? ` · ${program.location}` : ""}
+                    {program.isPublic ? " · Public schedule" : ""}
                   </p>
                 </div>
                 <Link className="btn btn-quiet" href={`/app/calendar/${program.id}`}>

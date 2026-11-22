@@ -1,5 +1,6 @@
 "use server";
 
+import { after } from "next/server";
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/auth";
 import {
@@ -43,25 +44,41 @@ export async function createAnnouncementAction(
     let message = "Announcement posted.";
     if (sendEmail) {
       const recipients = await listActiveMemberEmails();
-      const result = await sendAnnouncementEmails({
-        title: announcement.title,
-        body: announcement.body,
-        authorName: user.name,
-        recipients,
-      });
-
-      if (result.skipped) {
-        message =
-          "Announcement posted. Email skipped (SMTP not configured in this environment).";
-      } else if (result.failed === 0) {
-        await markAnnouncementEmailed(announcement.id);
-        message = `Announcement posted and emailed to ${result.sent} member${result.sent === 1 ? "" : "s"}.`;
-      } else if (result.sent > 0) {
-        await markAnnouncementEmailed(announcement.id);
-        message = `Announcement posted. Emailed ${result.sent}, failed ${result.failed}.`;
+      if (recipients.length === 0) {
+        message = "Announcement posted. No active members to email.";
       } else {
-        message =
-          "Announcement posted, but email delivery failed for all recipients.";
+        message = `Announcement posted. Emailing ${recipients.length} member${recipients.length === 1 ? "" : "s"} in the background.`;
+        after(async () => {
+          try {
+            const result = await sendAnnouncementEmails({
+              title: announcement.title,
+              body: announcement.body,
+              authorName: user.name,
+              recipients,
+            });
+            if (result.skipped) {
+              console.info(
+                "[announcements] email skipped (SMTP not configured)",
+                announcement.id,
+              );
+              return;
+            }
+            if (result.sent > 0) {
+              await markAnnouncementEmailed(announcement.id);
+            }
+            console.info("[announcements] email batch finished", {
+              id: announcement.id,
+              sent: result.sent,
+              failed: result.failed,
+            });
+          } catch (error) {
+            console.error(
+              "[announcements] background email failed",
+              announcement.id,
+              error,
+            );
+          }
+        });
       }
     }
 
