@@ -6,6 +6,7 @@ import { getCurrentUser } from "@/lib/auth";
 import type { UserRole } from "@/db/schema";
 import { canManageUsers } from "@/lib/roles";
 import {
+  deleteDisabledUser,
   resendInvite,
   updateUserRole,
   updateUserStatus,
@@ -111,6 +112,31 @@ export async function resendMemberInviteAction(
     return {
       ok: false,
       error: error instanceof Error ? error.message : "Resend failed.",
+    };
+  }
+}
+
+export async function deleteMemberAction(
+  userId: string,
+): Promise<ActionResult> {
+  try {
+    const current = await requireAdmin();
+    if (!userId) {
+      return { ok: false, error: "Missing member." };
+    }
+    const deleted = await deleteDisabledUser({
+      userId,
+      actorId: current.id,
+    });
+    revalidatePath("/app/admin");
+    return {
+      ok: true,
+      message: `Deleted ${deleted.name} (${deleted.email}).`,
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      error: error instanceof Error ? error.message : "Delete failed.",
     };
   }
 }

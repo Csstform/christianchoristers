@@ -41,7 +41,8 @@ export default async function AdminPage() {
         <p className="muted">
           View and manage everyone with access to the member app.{" "}
           {members.length} total · {activeCount} active · {invitedCount} invited
-          · {disabledCount} disabled.
+          · {disabledCount} disabled. Disabled members can be permanently
+          deleted (press Delete twice to confirm).
         </p>
         <MemberList members={members} currentUserId={user.id} />
       </section>
