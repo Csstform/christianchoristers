@@ -1,13 +1,17 @@
 import type { Metadata } from "next";
 import { PublicShell } from "@/components/public-shell";
-import { liveRecordings } from "@/data/public-catalog";
+import { listPublishedLiveRecordings } from "@/lib/live-recordings";
 import { youtubeEmbedUrl } from "@/lib/youtube";
 
 export const metadata: Metadata = {
   title: "Live Recordings",
 };
 
-export default function LiveRecordingsPage() {
+export const dynamic = "force-dynamic";
+
+export default async function LiveRecordingsPage() {
+  const recordings = await listPublishedLiveRecordings();
+
   return (
     <PublicShell solidHeader>
       <section className="section">
@@ -17,26 +21,26 @@ export default function LiveRecordingsPage() {
           congregations across North America.
         </p>
         <div className="recording-list">
-          {liveRecordings.map((item, index) => {
+          {recordings.map((item, index) => {
             const embedSrc = item.youtubeUrl
               ? youtubeEmbedUrl(item.youtubeUrl)
               : null;
 
             return (
               <article
-                key={`${item.title}-${item.year}`}
+                key={item.id}
                 style={{ animationDelay: `${index * 60}ms` }}
               >
                 <h3>{item.title}</h3>
                 <p className="muted">
                   {item.location}
-                  {item.year ? ` · ${item.year}` : ""}
+                  {item.recordedYear ? ` · ${item.recordedYear}` : ""}
                 </p>
                 {embedSrc ? (
                   <div className="recording-embed">
                     <iframe
                       src={embedSrc}
-                      title={`${item.title} – ${item.location}`}
+                      title={`${item.title} – ${item.location ?? "recording"}`}
                       loading="lazy"
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                       referrerPolicy="strict-origin-when-cross-origin"

@@ -55,12 +55,16 @@ function looksLikeMp4Audio(buffer: Buffer): boolean {
 export function validateAndCanonicalizeUpload(input: {
   kind: SongAssetKind;
   filename: string;
+  /** Full file or a short magic-byte prefix when streaming to disk. */
   buffer: Buffer;
+  /** Prefer file.size when `buffer` is only a header sample. */
+  sizeBytes?: number;
 }): { mimeType: string; safeFilename: string } {
-  if (input.buffer.length === 0) {
+  const size = input.sizeBytes ?? input.buffer.length;
+  if (size === 0 || input.buffer.length === 0) {
     throw new Error("Choose a file to upload.");
   }
-  if (input.buffer.length > MAX_UPLOAD_BYTES) {
+  if (size > MAX_UPLOAD_BYTES) {
     throw new Error("File is too large (25MB max).");
   }
 

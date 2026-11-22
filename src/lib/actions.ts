@@ -15,6 +15,8 @@ import {
   requestPasswordReset,
   resetPasswordWithToken,
 } from "@/lib/password-reset";
+import { clientKeyFromAction, takeRateLimit } from "@/lib/rate-limit";
+import { verifyTurnstileToken } from "@/lib/turnstile";
 import type { UserRole } from "@/db/schema";
 
 export type ActionResult = { ok: true; message?: string } | { ok: false; error: string };
@@ -26,6 +28,27 @@ export async function loginAction(
   const email = String(formData.get("email") ?? "");
   const password = String(formData.get("password") ?? "");
   const next = safeAppPath(String(formData.get("next") ?? ""));
+  const clientKey = await clientKeyFromAction();
+  const limited = takeRateLimit({
+    key: `login:${clientKey}`,
+    limit: 10,
+    windowMs: 15 * 60 * 1000,
+  });
+  if (!limited.ok) {
+    return {
+      ok: false,
+      error: `Too many login attempts. Try again in ${limited.retryAfterSec}s.`,
+    };
+  }
+
+  const turnstile = await verifyTurnstileToken({
+    token: String(formData.get("cf-turnstile-response") ?? ""),
+    remoteip: clientKey === "local" || clientKey === "unknown" ? undefined : clientKey,
+  });
+  if (!turnstile.ok) {
+    return { ok: false, error: turnstile.error };
+  }
+
   try {
     await loginWithPassword({ email, password });
   } catch (error) {
@@ -68,6 +91,27 @@ export async function requestPasswordResetAction(
   formData: FormData,
 ): Promise<ActionResult> {
   const email = String(formData.get("email") ?? "");
+  const clientKey = await clientKeyFromAction();
+  const limited = takeRateLimit({
+    key: `reset:${clientKey}:${email.trim().toLowerCase() || "blank"}`,
+    limit: 5,
+    windowMs: 15 * 60 * 1000,
+  });
+  if (!limited.ok) {
+    return {
+      ok: false,
+      error: `Too many reset requests. Try again in ${limited.retryAfterSec}s.`,
+    };
+  }
+
+  const turnstile = await verifyTurnstileToken({
+    token: String(formData.get("cf-turnstile-response") ?? ""),
+    remoteip: clientKey === "local" || clientKey === "unknown" ? undefined : clientKey,
+  });
+  if (!turnstile.ok) {
+    return { ok: false, error: turnstile.error };
+  }
+
   try {
     const { message } = await requestPasswordReset(email);
     return { ok: true, message };
@@ -113,6 +157,18 @@ export async function inviteUserAction(
   const email = String(formData.get("email") ?? "");
   const name = String(formData.get("name") ?? "");
   const role = String(formData.get("role") ?? "member") as UserRole;
+  const clientKey = await clientKeyFromAction();
+  const limited = takeRateLimit({
+    key: `invite:${current.id}`,
+    limit: 20,
+    windowMs: 60 * 60 * 1000,
+  });
+  if (!limited.ok) {
+    return {
+      ok: false,
+      error: `Too many invites. Try again in ${limited.retryAfterSec}s.`,
+    };
+  }
 
   try {
     const { inviteUrl, emailSent } = await createInvite({ email, name, role });

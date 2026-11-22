@@ -2,9 +2,16 @@
 
 import { useActionState } from "react";
 import Link from "next/link";
+import { TurnstileField } from "@/components/turnstile-field";
 import { loginAction, type ActionResult } from "@/lib/actions";
 
-export function LoginForm({ next }: { next: string }) {
+export function LoginForm({
+  next,
+  turnstileSiteKey,
+}: {
+  next: string;
+  turnstileSiteKey?: string | null;
+}) {
   const [state, formAction, pending] = useActionState<ActionResult | null, FormData>(
     loginAction,
     null,
@@ -29,6 +36,7 @@ export function LoginForm({ next }: { next: string }) {
             autoComplete="current-password"
           />
         </label>
+        {turnstileSiteKey ? <TurnstileField siteKey={turnstileSiteKey} /> : null}
         {state && !state.ok ? <p className="form-error">{state.error}</p> : null}
         <button className="btn btn-dark" type="submit" disabled={pending}>
           {pending ? "Signing in…" : "Sign in"}

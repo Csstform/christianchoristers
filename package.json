@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate",
+    "db:migrate": "node scripts/run-migrate.mjs",
     "db:push": "drizzle-kit push",
     "db:seed": "tsx -r tsconfig-paths/register scripts/seed-admin.ts",
     "db:mint-invite": "tsx -r tsconfig-paths/register scripts/mint-invite.ts",

@@ -2,12 +2,17 @@
 
 import { useActionState } from "react";
 import Link from "next/link";
+import { TurnstileField } from "@/components/turnstile-field";
 import {
   requestPasswordResetAction,
   type ActionResult,
 } from "@/lib/actions";
 
-export function ForgotPasswordForm() {
+export function ForgotPasswordForm({
+  turnstileSiteKey,
+}: {
+  turnstileSiteKey?: string | null;
+}) {
   const [state, formAction, pending] = useActionState<
     ActionResult | null,
     FormData
@@ -25,6 +30,7 @@ export function ForgotPasswordForm() {
           Email
           <input type="email" name="email" required autoComplete="email" />
         </label>
+        {turnstileSiteKey ? <TurnstileField siteKey={turnstileSiteKey} /> : null}
         {state && !state.ok ? <p className="form-error">{state.error}</p> : null}
         {state?.ok ? <p className="form-ok">{state.message}</p> : null}
         <button className="btn btn-dark" type="submit" disabled={pending}>

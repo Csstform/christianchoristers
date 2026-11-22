@@ -651,10 +651,36 @@ a {
   max-width: 420px;
 }
 
+.auth-panel--centered {
+  text-align: center;
+}
+
+.auth-panel--centered .form label {
+  text-align: center;
+}
+
+.auth-panel--centered .form input {
+  text-align: left;
+}
+
+.auth-panel--centered .turnstile-field {
+  justify-items: center;
+}
+
 .auth-panel h1,
 .app-shell h1 {
   font-family: var(--font-display), Georgia, serif;
   margin: 0 0 0.5rem;
+}
+
+.turnstile-field {
+  display: grid;
+  gap: 0.4rem;
+  justify-items: start;
+}
+
+.turnstile-field .form-error {
+  margin: 0;
 }
 
 .form {

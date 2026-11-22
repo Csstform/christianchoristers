@@ -151,10 +151,21 @@ export const programs = pgTable("programs", {
   startsAt: timestamp("starts_at", { withTimezone: true }).notNull(),
   endsAt: timestamp("ends_at", { withTimezone: true }),
   details: text("details"),
+  /** When true, upcoming programs appear on the public home schedule. */
+  isPublic: boolean("is_public").notNull().default(false),
   createdById: uuid("created_by_id").references(() => users.id),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+/** Key/value site settings (streaming links, album set URL, etc.). */
+export const siteSettings = pgTable("site_settings", {
+  key: varchar("key", { length: 64 }).primaryKey(),
+  value: text("value").notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true })
     .notNull()
     .defaultNow(),

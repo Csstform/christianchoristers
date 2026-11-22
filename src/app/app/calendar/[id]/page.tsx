@@ -87,6 +87,7 @@ export default async function ProgramDetailPage({
                   ? toDatetimeLocalValue(program.endsAt)
                   : "",
                 details: program.details ?? "",
+                isPublic: program.isPublic,
               }}
             />
           </details>

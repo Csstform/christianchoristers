@@ -1,5 +1,8 @@
-import { access, mkdir, unlink, writeFile } from "fs/promises";
+import { createWriteStream } from "fs";
+import { access, mkdir, unlink } from "fs/promises";
 import path from "path";
+import { Readable } from "stream";
+import { pipeline } from "stream/promises";
 import { asc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { albums } from "@/db/schema";
@@ -11,6 +14,7 @@ import {
 import {
   absoluteUploadPath,
   ensureUploadsRoot,
+  readFileHeader,
   uploadsRoot,
 } from "@/lib/storage";
 
@@ -172,19 +176,21 @@ export async function updateAlbumStreaming(
 export async function saveAlbumLocalAudio(input: {
   albumId: string;
   filename: string;
-  buffer: Buffer;
+  file: File;
 }): Promise<PublicAlbum> {
   const album = await getAlbumById(input.albumId);
   if (!album) throw new Error("Album not found.");
 
-  if (input.buffer.length > maxUploadBytes()) {
+  if (input.file.size > maxUploadBytes()) {
     throw new Error("File is too large (25MB max).");
   }
 
+  const header = await readFileHeader(input.file);
   const { mimeType, safeFilename } = validateAndCanonicalizeUpload({
     kind: "rehearsal_audio",
     filename: input.filename,
-    buffer: input.buffer,
+    buffer: header,
+    sizeBytes: input.file.size,
   });
   void mimeType;
   void safeFilename;
@@ -203,7 +209,10 @@ export async function saveAlbumLocalAudio(input: {
     }
   }
 
-  await writeFile(absolute, input.buffer);
+  const nodeStream = Readable.fromWeb(
+    input.file.stream() as import("stream/web").ReadableStream,
+  );
+  await pipeline(nodeStream, createWriteStream(absolute));
 
   const [row] = await db
     .update(albums)

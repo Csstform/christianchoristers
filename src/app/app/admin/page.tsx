@@ -26,12 +26,18 @@ export default async function AdminPage() {
       <section className="app-card" style={{ marginBottom: "1rem" }}>
         <h2>Public site</h2>
         <p className="muted">
-          Manage Spotify embeds, purchase links, and local streaming audio for
-          the public catalog.
+          Manage catalog streaming, live recordings, and home-page listening
+          links without a redeploy.
         </p>
-        <p>
+        <p style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
           <Link className="btn btn-quiet" href="/app/admin/music">
-            Public music streaming →
+            Public music →
+          </Link>
+          <Link className="btn btn-quiet" href="/app/admin/live-recordings">
+            Live recordings →
+          </Link>
+          <Link className="btn btn-quiet" href="/app/admin/settings">
+            Site settings →
           </Link>
         </p>
       </section>

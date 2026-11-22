@@ -12,9 +12,10 @@ COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV UPLOADS_DIR=/data/uploads
 RUN mkdir -p /data/uploads \
+  && chmod +x /app/scripts/docker-entrypoint.sh \
   && npm run build \
   && chown -R node:node /app /data
 
 USER node
 EXPOSE 3000
-CMD ["npm", "run", "start"]
+ENTRYPOINT ["/app/scripts/docker-entrypoint.sh"]

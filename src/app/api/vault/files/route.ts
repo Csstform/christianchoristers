@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { maxUploadBytes } from "@/lib/file-validation";
 import { canUpload } from "@/lib/roles";
-import { saveUpload } from "@/lib/storage";
+import { readFileHeader, saveUploadStream } from "@/lib/storage";
 import { createVaultFile } from "@/lib/vault";
 import { validateVaultUpload } from "@/lib/vault-validation";
 
@@ -43,16 +43,17 @@ export async function POST(request: Request) {
   }
 
   try {
-    const buffer = Buffer.from(await file.arrayBuffer());
+    const header = await readFileHeader(file, 2048);
     const { mimeType, safeFilename } = validateVaultUpload({
       filename: file.name,
-      buffer,
+      buffer: header,
+      sizeBytes: file.size,
     });
 
-    const saved = await saveUpload({
+    const saved = await saveUploadStream({
       category: "vault",
       originalName: safeFilename,
-      data: buffer,
+      stream: file.stream(),
       mimeType,
     });
 
@@ -60,7 +61,7 @@ export async function POST(request: Request) {
       name: displayName || file.name,
       storagePath: saved.storagePath,
       mimeType,
-      sizeBytes: buffer.length,
+      sizeBytes: file.size,
       uploadedById: user.id,
     });
 

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { peaksFromAudioBuffer } from "@/lib/audio-peaks";
 
 const DEFAULT_BARS = 96;
+const peaksCache = new Map<string, number[]>();
 
 function formatTime(seconds: number): string {
   if (!Number.isFinite(seconds) || seconds < 0) return "0:00";
@@ -68,6 +69,7 @@ export function WaveformPlayer({
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const trackRef = useRef<HTMLDivElement | null>(null);
+  const rootRef = useRef<HTMLDivElement | null>(null);
   const peaksRef = useRef<number[]>([]);
   const progressRef = useRef(0);
   const draggingRef = useRef(false);
@@ -81,6 +83,7 @@ export function WaveformPlayer({
   const [muted, setMuted] = useState(false);
   const [loadingWave, setLoadingWave] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [visible, setVisible] = useState(false);
 
   function redraw() {
     const canvas = canvasRef.current;
@@ -89,11 +92,41 @@ export function WaveformPlayer({
   }
 
   useEffect(() => {
+    const node = rootRef.current;
+    if (!node) return;
+    if (typeof IntersectionObserver === "undefined") {
+      setVisible(true);
+      return;
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          setVisible(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "200px 0px" },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
     peaksRef.current = peaks;
     redraw();
   }, [peaks]);
 
   useEffect(() => {
+    if (!visible) return;
+
+    const cached = peaksCache.get(src);
+    if (cached) {
+      setPeaks(cached);
+      setLoadingWave(false);
+      setError(null);
+      return;
+    }
+
     let cancelled = false;
     setLoadingWave(true);
     setError(null);
@@ -109,6 +142,7 @@ export function WaveformPlayer({
         if (cancelled) return;
         const nextPeaks = await peaksFromAudioBuffer(buffer, DEFAULT_BARS);
         if (cancelled) return;
+        peaksCache.set(src, nextPeaks);
         setPeaks(nextPeaks);
       } catch (err) {
         if (!cancelled) {
@@ -124,7 +158,7 @@ export function WaveformPlayer({
     return () => {
       cancelled = true;
     };
-  }, [src]);
+  }, [src, visible]);
 
   useEffect(() => {
     const onResize = () => redraw();
@@ -239,7 +273,11 @@ export function WaveformPlayer({
   const volumePercent = Math.round((muted ? 0 : volume) * 100);
 
   return (
-    <div className="waveform-player" aria-label={label || "Audio player"}>
+    <div
+      ref={rootRef}
+      className="waveform-player"
+      aria-label={label || "Audio player"}
+    >
       <audio ref={audioRef} src={src} preload="metadata" />
       <div className="waveform-player__row">
         <button
