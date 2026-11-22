@@ -13,7 +13,7 @@ export default async function LoginPage({
 
   return (
     <PublicShell solidHeader>
-      <div className="auth-panel">
+      <div className="auth-panel auth-panel--centered">
         <LoginForm next={next} turnstileSiteKey={turnstileSiteKey()} />
       </div>
     </PublicShell>
