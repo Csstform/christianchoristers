@@ -1,9 +1,11 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import type { ActionResult } from "@/lib/actions";
 import type { UserRole } from "@/db/schema";
 import {
+  deleteMemberAction,
   resendMemberInviteAction,
   updateMemberRoleAction,
   updateMemberStatusAction,
@@ -31,6 +33,7 @@ export function MemberRowActions({
   member: MemberActionTarget;
   isSelf: boolean;
 }) {
+  const router = useRouter();
   const [roleState, roleAction, rolePending] = useActionState<
     ActionResult | null,
     FormData
@@ -43,6 +46,15 @@ export function MemberRowActions({
     ActionResult | null,
     FormData
   >(resendMemberInviteAction, null);
+  const [deletePending, startDelete] = useTransition();
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleteState, setDeleteState] = useState<ActionResult | null>(null);
+
+  useEffect(() => {
+    if (!confirmDelete) return;
+    const timer = window.setTimeout(() => setConfirmDelete(false), 4000);
+    return () => window.clearTimeout(timer);
+  }, [confirmDelete]);
 
   if (isSelf) {
     return <p className="muted member-self-note">This is you</p>;
@@ -106,6 +118,41 @@ export function MemberRowActions({
             </button>
           </form>
           <ActionFeedback state={inviteState} />
+        </>
+      ) : null}
+
+      {member.status === "disabled" ? (
+        <>
+          <button
+            type="button"
+            className={
+              confirmDelete ? "btn btn-danger is-confirming" : "btn btn-danger"
+            }
+            disabled={deletePending}
+            aria-pressed={confirmDelete}
+            onClick={() => {
+              if (!confirmDelete) {
+                setConfirmDelete(true);
+                setDeleteState(null);
+                return;
+              }
+              startDelete(async () => {
+                const result = await deleteMemberAction(member.id);
+                setDeleteState(result);
+                if (result.ok) {
+                  setConfirmDelete(false);
+                  router.refresh();
+                }
+              });
+            }}
+          >
+            {deletePending
+              ? "Deleting…"
+              : confirmDelete
+                ? "Press again to confirm"
+                : "Delete member"}
+          </button>
+          <ActionFeedback state={deleteState} />
         </>
       ) : null}
     </div>

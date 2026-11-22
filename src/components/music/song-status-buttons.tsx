@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import {
   deleteSongAction,
   setSongStatusAction,
@@ -18,6 +18,13 @@ export function SongStatusButtons({
 }) {
   const [pending, startTransition] = useTransition();
   const [message, setMessage] = useState<MusicActionResult | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+
+  useEffect(() => {
+    if (!confirmDelete) return;
+    const timer = window.setTimeout(() => setConfirmDelete(false), 4000);
+    return () => window.clearTimeout(timer);
+  }, [confirmDelete]);
 
   if (!canArchive) return null;
 
@@ -25,6 +32,9 @@ export function SongStatusButtons({
     startTransition(async () => {
       const result = await action();
       setMessage(result);
+      if (result.ok) {
+        setConfirmDelete(false);
+      }
     });
   }
 
@@ -35,7 +45,10 @@ export function SongStatusButtons({
           type="button"
           className="btn btn-quiet"
           disabled={pending}
-          onClick={() => run(() => setSongStatusAction(songId, "archive"))}
+          onClick={() => {
+            setConfirmDelete(false);
+            run(() => setSongStatusAction(songId, "archive"));
+          }}
         >
           Move to archive
         </button>
@@ -44,23 +57,33 @@ export function SongStatusButtons({
           type="button"
           className="btn btn-quiet"
           disabled={pending}
-          onClick={() => run(() => setSongStatusAction(songId, "active"))}
+          onClick={() => {
+            setConfirmDelete(false);
+            run(() => setSongStatusAction(songId, "active"));
+          }}
         >
           Restore to active
         </button>
       )}
       <button
         type="button"
-        className="btn btn-danger"
+        className={confirmDelete ? "btn btn-danger is-confirming" : "btn btn-danger"}
         disabled={pending}
+        aria-pressed={confirmDelete}
         onClick={() => {
-          if (!confirm("Delete this song and its files from the library?")) {
+          if (!confirmDelete) {
+            setConfirmDelete(true);
+            setMessage(null);
             return;
           }
           run(() => deleteSongAction(songId));
         }}
       >
-        Delete
+        {pending && confirmDelete
+          ? "Deleting…"
+          : confirmDelete
+            ? "Press again to confirm"
+            : "Delete"}
       </button>
       {message?.ok ? <p className="form-ok">{message.message}</p> : null}
       {message && !message.ok ? (

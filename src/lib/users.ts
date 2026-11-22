@@ -1,8 +1,12 @@
 import { and, asc, count, eq, ne } from "drizzle-orm";
 import { db } from "@/db";
 import {
+  announcements,
+  files,
   invites,
+  programs,
   sessions,
+  songSuggestions,
   users,
   type User,
   type UserRole,
@@ -201,4 +205,78 @@ export async function resendInvite(input: {
   }
 
   return { inviteUrl, email: target.email, emailSent };
+}
+
+/** Permanently remove a disabled member. Cascades sessions/invites/RSVPs. */
+export async function deleteDisabledUser(input: {
+  userId: string;
+  actorId: string;
+}): Promise<ManagedUser> {
+  if (input.userId === input.actorId) {
+    throw new Error("You cannot delete your own account.");
+  }
+
+  const target = await getUserById(input.userId);
+  if (!target) {
+    throw new Error("Member not found.");
+  }
+  if (target.status !== "disabled") {
+    throw new Error("Only disabled members can be deleted. Disable them first.");
+  }
+
+  const blockers: string[] = [];
+  const [announcementRow] = await db
+    .select({ value: count() })
+    .from(announcements)
+    .where(eq(announcements.authorId, target.id));
+  if (Number(announcementRow?.value ?? 0) > 0) {
+    blockers.push("announcements");
+  }
+  const [fileRow] = await db
+    .select({ value: count() })
+    .from(files)
+    .where(eq(files.uploadedById, target.id));
+  if (Number(fileRow?.value ?? 0) > 0) {
+    blockers.push("vault files");
+  }
+  const [suggestionRow] = await db
+    .select({ value: count() })
+    .from(songSuggestions)
+    .where(eq(songSuggestions.submittedById, target.id));
+  if (Number(suggestionRow?.value ?? 0) > 0) {
+    blockers.push("song suggestions");
+  }
+  if (blockers.length > 0) {
+    throw new Error(
+      `Cannot delete ${target.name}: they still have ${blockers.join(", ")}. Remove or reassign that content first.`,
+    );
+  }
+
+  await db
+    .update(programs)
+    .set({ createdById: null })
+    .where(eq(programs.createdById, target.id));
+  await db
+    .update(songSuggestions)
+    .set({ reviewedById: null })
+    .where(eq(songSuggestions.reviewedById, target.id));
+
+  const [deleted] = await db
+    .delete(users)
+    .where(and(eq(users.id, target.id), eq(users.status, "disabled")))
+    .returning({
+      id: users.id,
+      email: users.email,
+      name: users.name,
+      role: users.role,
+      status: users.status,
+      createdAt: users.createdAt,
+      updatedAt: users.updatedAt,
+    });
+
+  if (!deleted) {
+    throw new Error("Member not found or is no longer disabled.");
+  }
+
+  return deleted;
 }
